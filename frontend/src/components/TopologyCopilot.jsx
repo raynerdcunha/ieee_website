@@ -1,33 +1,57 @@
 import React, { useState } from 'react';
-import { Terminal, GitBranch, Zap, GitFork } from 'lucide-react';
+import { Zap, GitFork, Send } from 'lucide-react';
 
-export default function TopologyCopilot() {
+export default function TopologyCopilot({ status }) {
   const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState([
+    { sender: 'system', content: 'IEEE 33-Bus System Copilot Terminal online.' }
+  ]);
 
-  // Handle Quick Pill clicks to populate the text input
+  // FIX: This function was missing
   const handlePillClick = (commandText) => {
     setInputValue(commandText);
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    // FIX: Using the same variable name consistently
+    const msg = { sender: 'user', content: inputValue };
+    setMessages((prev) => [...prev, msg]);
+    setInputValue(''); 
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg.content }),
+      });
+      const data = await response.json();
+      setMessages((prev) => [...prev, { sender: 'system', content: data.reply }]);
+    } catch (err) {
+      console.error("Backend error:", err);
+    }
   };
 
   return (
     <div className="bg-[#0b1329] rounded-xl p-4 border border-blue-900/40 shadow-xl flex flex-col h-full min-h-[600px]">
       
-      {/* Header section */}
-      <div className="flex justify-between items-center mb-4">
+      {/* Header section: Removed the redundant flex div, using grid directly */}
+      <div className="grid grid-cols-3 items-center mb-4 w-full">
         <div className="flex items-center gap-2">
           <span className="text-orange-600 text-sm">🤖</span>
           <h2 className="text-sm font-bold tracking-wider text-slate-200 uppercase">Topology Copilot</h2>
         </div>
-        
-        {/* Badges Container with Lucide Icons */}
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-blue-900/30 text-blue-400 font-mono px-3 py-1 rounded-full border border-blue-800/50">
+        <div className="flex justify-center">
+          <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider font-mono px-3 py-1 rounded-full border ${status === "Not Started" ? "bg-red-900/30 text-red-400 border-red-800/50" : "bg-blue-900/30 text-blue-400 border-blue-800/50"}`}>
             <Zap size={12} />
-            Session: Not Started
+            Session: { status}
           </span>
-          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-green-900/30 text-green-400 font-mono px-3 py-1 rounded-full border border-green-800/50">
-            <GitFork size={12} />
-            Branch Chat
+        </div>
+        <div className="flex justify-end">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-green-900/30 text-green-400 font-mono px-3 py-1 rounded-full border border-blue-800/50">
+          <GitFork size={12} />
+          Branch Chat
           </span>
         </div>
       </div>
@@ -63,16 +87,16 @@ export default function TopologyCopilot() {
       </div>
 
       {/* Input Action Command Line */}
-      <div className="relative flex items-center">
+      <div className="flex gap-2 items-center w-full mt-2">
         <input 
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="disconnect [34] or reset |..."
-          className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-3 pr-10 text-xs font-mono text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-slate-700"
+          className="flex-grow bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-xs font-mono text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-slate-700"
         />
-        <button className="absolute right-2 text-blue-500 hover:text-blue-400 p-1">
-          ➔
+        <button className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-blue-400 transition-colors">
+          <Send size={16} /> {/* Make sure to import { Send } from 'lucide-react' */}
         </button>
       </div>
     </div>
