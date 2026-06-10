@@ -45,7 +45,6 @@ def get_full_history(session_name: str):
         print(f"Error reading history: {e}")
         
     # --- DYNAMIC WELCOME MESSAGE INJECTION ---
-    # Use the timestamp of the first actual message, or current time if empty
     initial_timestamp = history[0]["timestamp"] if history else get_server_time()
     
     welcome_message = {
@@ -54,9 +53,7 @@ def get_full_history(session_name: str):
         "timestamp": initial_timestamp
     }
     
-    # Prepend to the beginning of the history list
     history.insert(0, welcome_message)
-    
     return history
 
 def get_session_state_from_file(session_name: str):
@@ -78,8 +75,10 @@ def get_session_state_from_file(session_name: str):
             for line in f:
                 if line.strip():
                     entry = json.loads(line.strip())
-                    last_stage = entry.get("stage", 1)
-                    if last_stage >= 2 and entry["sender"] == "user" and entry["content"].isdigit():
+                    # FIXED: Safely grab the absolute latest stage written to log
+                    if "stage" in entry:
+                        last_stage = entry["stage"]
+                    if entry["sender"] == "user" and entry["content"].isdigit():
                         last_bus = entry["content"]
     except:
         pass
@@ -115,10 +114,8 @@ async def get_session_endpoint(session_name: str):
     target_path = get_file_path(clean_name)
     if os.path.exists(target_path):
         parsed_history = get_full_history(clean_name)
-        # We pass the status as "ACTIVE" so the frontend knows it's safe to load
         return {"status": "ACTIVE", "session_name": clean_name, "history": parsed_history}
     else:
-        # Crucial fix: Tell the frontend this session is completely missing!
         return {"status": "NOT_FOUND", "reply": f"Session '{clean_name}' does not exist.", "timestamp": get_server_time()}
     
 @app.post("/api/chat")
@@ -141,18 +138,12 @@ async def chat_endpoint(payload: dict = Body(...)):
 
         target_path = get_file_path(user_stripped)
         
-        # Scenario A: Session already exists
         if os.path.exists(target_path):
             system_reply = f"Session '{user_stripped}' already exists. Would you like to OVERWRITE or CONTINUE?"
             system_time = get_server_time()
-            
-            # Create the file pointer tracking state 0 (pending action)
             append_to_log(user_stripped, "user", user_stripped, user_log_time, 0)
             append_to_log(user_stripped, "system", system_reply, system_time, 0)
-            
             return {"reply": system_reply, "status": "Not Started", "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
-        
-        # Scenario B: Session is new and completely free
         else:
             system_reply = f"Session set to '{user_stripped}'. What standard bus are you using?"
             system_time = get_server_time()
@@ -160,14 +151,12 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(user_stripped, "system", system_reply, system_time, 1)
             return {"reply": system_reply, "status": user_stripped, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
 
-    # Fetch recorded history layout parameters
     state = get_session_state_from_file(session_name)
     current_stage = state["stage"]
 
     # --- PHASE 2: CONFLICT RESOLUTION (OVERWRITE OR CONTINUE) ---
     if current_stage == 0:
         if user_message == "overwrite":
-            # Destroy local file log completely
             try:
                 os.remove(get_file_path(session_name))
             except:
@@ -179,20 +168,15 @@ async def chat_endpoint(payload: dict = Body(...)):
             return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
             
         elif user_message == "continue":
-            # Reconstruct entire chat timeline directly back to user
             system_time = get_server_time()
-            
-            # Log the explicit invocation to continue
             append_to_log(session_name, "user", user_stripped, user_log_time, 1) 
             
-            # Advance structural internal sequence out of stage 0 safely
             state_correction = get_session_state_from_file(session_name)
             active_stage = state_correction["stage"] if state_correction["stage"] != 0 else 1
             append_to_log(session_name, "system", "Resuming session pipeline...", system_time, active_stage)
             
             refreshed_history = get_full_history(session_name)
             return {"history": refreshed_history, "status": session_name, "session_name": session_name}
-        
         else:
             system_reply = "Invalid option. Please specify 'overwrite' or 'continue':"
             system_time = get_server_time()
@@ -217,12 +201,19 @@ async def chat_endpoint(payload: dict = Body(...)):
 
     # --- PHASE 4: STAGE 2 (ACTIVE COMMAND ARCHITECTURE) ---
     else:
+        # FIXED: Added support for all backend commands mapping to frontend pill actions
         if "isolate" in user_message:
             response = f"Isolating buses {user_message.replace('isolate', '').strip()}. Network updated."
         elif "reset network" in user_message:
-            response = "Network resetted."
+            response = "Network reset execution sequence initiated. Configuration standard restored."
+        elif "power factor" in user_message:
+            response = "Calculating active power vectors. Power factor optimization matrices logged."
+        elif "reset parameters" in user_message:
+            response = "Bus variables and matrix boundary parameters reset to factory initialization values."
+        elif "display smiley face" in user_message:
+            response = "Grid visualization mode activated: 🤖 Matrix operations complete! 🌟"
         else:
-            response = "Command not recognized."
+            response = f"Command '{user_stripped}' not recognized. Try using the quick action macros below."
             
         system_time = get_server_time()
         append_to_log(session_name, "user", user_stripped, user_log_time, 2)

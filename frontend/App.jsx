@@ -74,18 +74,21 @@ function App() {
   };
 
   return (
-    /* FLUID FRAME CONTAINER: Fills full screen layout boundaries */
-    <div className="w-full h-full min-h-screen flex flex-col bg-[#020617]">
+  /* CHANGED: Added 'items-end' to align the child to the bottom (down) side of the screen */
+  <div className="w-full h-full min-h-screen flex justify-end items-end bg-[#020617]">
+    {/* CHANGED: Used your existing syntax to specify vertical height percentage explicitly (e.g., h-[85%]) */}
+    <div className="w-[37%] h-[100%] p-4">
       <TopologyCopilot 
         status={sessionStatus} 
         setStatus={setSessionStatus}
         sessionName={sessionName}        
         setSessionName={handleSessionNameChange}  
         initialData={initialData}
-        currentTheme={currentTheme} /* Passing current theme state */
+        currentTheme={currentTheme}
       />
     </div>
-  );
+  </div>
+);
 }
 
 export default App;
