@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ==========================================
+   CUSTOM TERMINAL SCROLLBAR STYLING
+   ========================================== */
+
+/* 1. Define the overall width of the scroll track */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Ultra-thin, crisp aesthetic */
+}
+
+/* 2. Style the background track line */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #111a2e; /* Matches your chat window background (#111a2e) exactly */
+  border-radius: 8px;
+}
+
+/* 3. Style the interactive scrolling thumb indicator */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.2); /* Discrete slate-blue tint by default */
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* 4. Highlight the thumb when a user hovers over it */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.4); /* Glows emerald green when interacted with */
+  border-color: rgba(16, 185, 129, 0.2);
+}
