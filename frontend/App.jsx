@@ -5,6 +5,8 @@ function App() {
   const [sessionStatus, setSessionStatus] = useState("Not Started");
   const [sessionName, setSessionName] = useState("");
   const [initialData, setInitialData] = useState(null);
+  /* STATE TRACKING: Holds theme preferences, defaulting to dark mode layout configurations */
+  const [currentTheme, setCurrentTheme] = useState("dark");
 
   useEffect(() => {
     const initializeSystem = async () => {
@@ -18,25 +20,21 @@ function App() {
           });
           const data = await response.json();
 
-          // FIX: Catch both INVALID name length AND a missing session file!
           if (data.status === "INVALID" || data.status === "NOT_FOUND") {
-            window.history.pushState(null, '', '/'); // Strip the /session1 slug away
+            window.history.pushState(null, '', '/'); 
             setSessionStatus("Not Started");
             setSessionName("");
             
-            // Seed the chat with the init failure message
             setInitialData({
               reply: data.status === "INVALID" ? `Session rejected: ${data.reply}` : `Redirected: ${data.reply}`,
               timestamp: data.timestamp
             });
           } else {
-            // If the session was found, set its status and hydrate history
-            setSessionStatus("Active"); // Or use data.session_name / "Active"
+            setSessionStatus("Active"); 
             setSessionName(data.session_name || pathSlug);
             setInitialData(data);
           }
         } else {
-          // Normal bootup at localhost:5173/ with no parameter
           const response = await fetch("http://127.0.0.1:8000/api/init", {
             method: "GET",
             headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
@@ -66,7 +64,6 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Sync state and push URL parameter ONLY when the name is locked in (not empty)
   const handleSessionNameChange = (newName) => {
     setSessionName(newName);
     if (newName) {
@@ -77,13 +74,15 @@ function App() {
   };
 
   return (
-    <div className="w-full h-[600px] p-4 flex flex-col bg-[#020617]">
+    /* FLUID FRAME CONTAINER: Fills full screen layout boundaries */
+    <div className="w-full h-full min-h-screen flex flex-col bg-[#020617]">
       <TopologyCopilot 
         status={sessionStatus} 
         setStatus={setSessionStatus}
         sessionName={sessionName}        
         setSessionName={handleSessionNameChange}  
         initialData={initialData}
+        currentTheme={currentTheme} /* Passing current theme state */
       />
     </div>
   );
