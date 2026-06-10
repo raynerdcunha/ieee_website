@@ -1,0 +1,81 @@
+/* src/styles/TopologyCopilot.css */
+
+/* 1. SHARED CONSTANTS (STATUS & BRANCH - NEVER CHANGE) */
+:root {
+  /* Status Badges */
+  --bg-status-inactive: rgba(153, 27, 27, 0.3); /* red-900/30 */
+  --text-status-inactive: #f87171;              /* red-400 */
+  --bg-status-active: rgba(30, 58, 138, 0.3);   /* blue-900/30 */
+  --text-status-active: #60a5fa;                /* blue-400 */
+  
+  /* Branch Badge */
+  --bg-branch: rgba(21, 128, 61, 0.3);          /* green-900/30 */
+  --text-branch: #4ade80;                       /* green-400 */
+}
+
+/* 2. DARK THEME */
+[data-theme='dark'] {
+  --bg-outer: #0b1329;
+  --border-outer: rgba(30, 58, 138, 0.4);
+  --text-header: #e2e8f0;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --bg-inner: #111a2e;
+  --border-inner: #1e293b;
+  --bg-user-bubble: rgba(30, 58, 138, 0.2);
+  --border-user-bubble: rgba(59, 130, 246, 0.3);
+  --bg-system-bubble: rgba(15, 23, 42, 0.4);
+  --border-system-bubble: rgba(30, 41, 59, 0.6);
+  --bg-pill: #1e293b;
+  --hover-pill: #334155;
+  --text-pill: #cbd5e1;
+  --border-pill: #334155;
+  --bg-input: #020617;
+  --text-input: #34d399;
+  --placeholder-input: #475569;
+}
+
+/* 3. LIGHT THEME */
+[data-theme='light'] {
+  /* Background: A soft "Ghost White" with a tiny blue tint to feel "techy" */
+  --bg-outer: #f8fafc;
+  --border-outer: #e2e8f0;
+
+  /* Text: Dark slate instead of pure black for readability */
+  --text-header: #1e293b;
+  --text-main: #334155;
+  --text-muted: #64748b;
+
+  /* Inner elements: Slightly darker than outer to create depth */
+  --bg-inner: #f1f5f9;
+  --border-inner: #cbd5e1;
+
+  /* Bubbles: Very light blue/gray tints */
+  --bg-user-bubble: #e0e7ff; /* Very soft indigo-tinted */
+  --border-user-bubble: #c7d2fe;
+  --bg-system-bubble: #e2e8f0; /* Soft neutral gray */
+  --border-system-bubble: #cbd5e1;
+
+  /* Pills/Buttons: Clean, clickable, distinct */
+  --bg-pill: #e2e8f0;
+  --hover-pill: #d1d5db;
+  --text-pill: #475569;
+  --border-pill: #cbd5e1;
+
+  /* Input: Solid white so it feels like an entry field, but with a refined border */
+  --bg-input: #ffffff;
+  --text-input: #059669; /* A darker, readable emerald */
+  --placeholder-input: #94a3b8;
+}
+
+/* 4. SHARED SCROLLBAR STYLES */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-inner);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-inner);
+  border-radius: 10px;
+}
