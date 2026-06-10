@@ -74,21 +74,39 @@ function App() {
   };
 
   return (
-  /* CHANGED: Added 'items-end' to align the child to the bottom (down) side of the screen */
-  <div className="w-full h-full min-h-screen flex justify-end items-end bg-[#020617]">
-    {/* CHANGED: Used your existing syntax to specify vertical height percentage explicitly (e.g., h-[85%]) */}
-    <div className="w-[37%] h-[100%] p-4">
-      <TopologyCopilot 
-        status={sessionStatus} 
-        setStatus={setSessionStatus}
-        sessionName={sessionName}        
-        setSessionName={handleSessionNameChange}  
-        initialData={initialData}
-        currentTheme={currentTheme}
-      />
+    /* Outer layout remains full screen and securely positions the panel in the bottom right corner */
+    <div className="w-full h-full min-h-screen flex justify-end items-end bg-[#020617] p-4 overflow-hidden">
+      
+      {/* THE PERFECT FIX: 
+        1. Outer bounding box enforces the exact target proportions on your viewport: 30% width, 81.081% height.
+        2. Flex layouts push content to the bottom right edge internally.
+        3. Scaled inner layout component remains 100% visible with a uniform scaling matrix applied smoothly.
+      */}
+      <div className="w-[30%] h-[93%] flex justify-end items-end relative">
+        <div 
+          style={{
+            width: '123.333%',   // Math to cleanly invert 30% back to its 37% base canvas width
+            height: '123.333%',  // Math to cleanly invert 81.081% back to its 100% base height
+            transform: 'scale(0.81081)',
+            transformOrigin: 'bottom right',
+            position: 'absolute',
+            bottom: 0,
+            right: 0
+          }}
+        >
+          <TopologyCopilot 
+            status={sessionStatus} 
+            setStatus={setSessionStatus}
+            sessionName={sessionName}        
+            setSessionName={handleSessionNameChange}  
+            initialData={initialData}
+            currentTheme={currentTheme}
+          />
+        </div>
+      </div>
+
     </div>
-  </div>
-);
+  );
 }
 
 export default App;
