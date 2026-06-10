@@ -9,11 +9,17 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
 
   useEffect(() => {
     if (initialData) {
-      setMessages([{ 
-        sender: 'system', 
-        content: initialData.reply, 
-        timestamp: initialData.timestamp 
-      }]);
+      if (initialData.history) {
+        // If the backend sent a pre-compiled history array, render it immediately
+        setMessages(initialData.history);
+      } else {
+        // Otherwise, render a single system string (welcome message or error notification)
+        setMessages([{ 
+          sender: 'system', 
+          content: initialData.reply, 
+          timestamp: initialData.timestamp 
+        }]);
+      }
     }
   }, [initialData]);
 
@@ -35,8 +41,12 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
       const response = await fetch("http://127.0.0.1:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userContent }),
+        body: JSON.stringify({ 
+          message: userContent,
+          session_name: sessionName 
+        }),
       });
+      
       const data = await response.json();
       
       if (data.history) {
@@ -51,6 +61,7 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
       
       if (setStatus && data.status) setStatus(data.status);
       if (setSessionName && data.session_name !== undefined) setSessionName(data.session_name);
+      
     } catch (err) {
       console.error("Backend transmission error:", err);
     }

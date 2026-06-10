@@ -15,13 +15,6 @@ app.add_middleware(
 
 HISTORY_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "chat-history"))
 
-SESSION_STATE = {
-    "stage": 0,           
-    "session_name": "",
-    "bus_system": "",
-    "pending_name": ""
-}
-
 def get_server_time():
     return datetime.now().strftime("%I:%M:%S %p")
 
@@ -30,10 +23,72 @@ def get_file_path(session_name: str) -> str:
         os.makedirs(HISTORY_DIR, exist_ok=True)
     return os.path.join(HISTORY_DIR, f"{session_name}.jsonl")
 
-def append_to_log(sender: str, content: str, timestamp: str, stage: int):
-    file_path = get_file_path(SESSION_STATE["session_name"])
+def get_full_history(session_name: str):
+    """Helper to parse logged entries and inject the initial welcome message."""
+    file_path = get_file_path(session_name)
+    history = []
+    
+    if not os.path.exists(file_path):
+        return history
+        
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    entry = json.loads(line.strip())
+                    history.append({
+                        "sender": entry["sender"],
+                        "content": entry["content"],
+                        "timestamp": entry["timestamp"]
+                    })
+    except Exception as e:
+        print(f"Error reading history: {e}")
+        
+    # --- DYNAMIC WELCOME MESSAGE INJECTION ---
+    # Use the timestamp of the first actual message, or current time if empty
+    initial_timestamp = history[0]["timestamp"] if history else get_server_time()
+    
+    welcome_message = {
+        "sender": "system",
+        "content": "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin.",
+        "timestamp": initial_timestamp
+    }
+    
+    # Prepend to the beginning of the history list
+    history.insert(0, welcome_message)
+    
+    return history
+
+def get_session_state_from_file(session_name: str):
+    """
+    Reconstructs the current stage and parameters from the log.
+    Stage 0: Pending user choice (overwrite or continue)
+    Stage 1: Waiting for standard bus input
+    Stage 2: Processing grid topology commands
+    """
+    file_path = get_file_path(session_name)
+    if not os.path.exists(file_path):
+        return {"stage": 1, "bus_system": ""}
+    
+    last_stage = 1
+    last_bus = ""
+    
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    entry = json.loads(line.strip())
+                    last_stage = entry.get("stage", 1)
+                    if last_stage >= 2 and entry["sender"] == "user" and entry["content"].isdigit():
+                        last_bus = entry["content"]
+    except:
+        pass
+    return {"stage": last_stage, "bus_system": last_bus}
+
+def append_to_log(session_name: str, sender: str, content: str, timestamp: str, stage: int):
+    file_path = get_file_path(session_name)
     log_entry = {
-        "session_name": SESSION_STATE["session_name"],
+        "session_name": session_name,
         "stage": stage,
         "sender": sender,
         "timestamp": timestamp,
@@ -44,10 +99,6 @@ def append_to_log(sender: str, content: str, timestamp: str, stage: int):
 
 @app.get("/api/init")
 async def init_endpoint():
-    SESSION_STATE["stage"] = 0
-    SESSION_STATE["session_name"] = ""
-    SESSION_STATE["bus_system"] = ""
-    SESSION_STATE["pending_name"] = ""
     return {
         "reply": "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin.",
         "status": "Not Started",
@@ -62,209 +113,118 @@ async def get_session_endpoint(session_name: str):
         return {"status": "INVALID", "reply": "Session name must be under 18 characters.", "timestamp": get_server_time()}
         
     target_path = get_file_path(clean_name)
-    SESSION_STATE["session_name"] = clean_name
-    
     if os.path.exists(target_path):
-        parsed_history = []
-        last_recorded_stage = 1
-        last_recorded_bus = ""
-        try:
-            with open(target_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.strip():
-                        entry = json.loads(line.strip())
-                        parsed_history.append({
-                            "sender": entry["sender"],
-                            "content": entry["content"],
-                            "timestamp": entry["timestamp"]
-                        })
-                        last_recorded_stage = entry.get("stage", 1)
-                        if last_recorded_stage >= 2 and entry["sender"] == "user" and entry["content"].isdigit():
-                            last_recorded_bus = entry["content"]
-        except Exception as e:
-            print(f"Error parsing log: {e}")
-            
-        SESSION_STATE["stage"] = last_recorded_stage
-        if last_recorded_bus:
-            SESSION_STATE["bus_system"] = last_recorded_bus
-            
+        parsed_history = get_full_history(clean_name)
+        # We pass the status as "ACTIVE" so the frontend knows it's safe to load
         return {"status": "ACTIVE", "session_name": clean_name, "history": parsed_history}
     else:
-        SESSION_STATE["stage"] = 1
-        SESSION_STATE["bus_system"] = ""
-        system_reply = f"Session set to '{clean_name}'. What standard bus are you using?"
-        system_time = get_server_time()
-        append_to_log("system", system_reply, system_time, 1)
-        return {"reply": system_reply, "status": "ACTIVE", "session_name": clean_name, "timestamp": system_time}
-
+        # Crucial fix: Tell the frontend this session is completely missing!
+        return {"status": "NOT_FOUND", "reply": f"Session '{clean_name}' does not exist.", "timestamp": get_server_time()}
+    
 @app.post("/api/chat")
 async def chat_endpoint(payload: dict = Body(...)):
     user_raw = payload.get("message", "")
+    session_name = payload.get("session_name", "").strip()
     user_stripped = user_raw.strip()
     user_message = user_stripped.lower()
-    
-    current_stage = SESSION_STATE["stage"]
     user_log_time = get_server_time()
-    
-    # ----------------------------------------------------------------------
-    # STAGE 0: INITIAL NAME ENTRY & CONFLICT DELEGATION
-    # ----------------------------------------------------------------------
-    if current_stage == 0:
+
+    # --- PHASE 1: STAGE 0 - RECEIVING & VALIDATING SESSION NAME ---
+    if not session_name:
         if len(user_stripped) >= 18:
-            return {
-                "reply": "Invalid name. Session name must be under 18 characters. Please enter Session Name again:",
-                "status": "Not Started",
-                "session_name": "",
-                "user_time": user_log_time,
-                "system_time": get_server_time()
-            }
+            system_reply = "Session name must be under 18 characters. Try again:"
+            return {"reply": system_reply, "status": "Not Started", "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
         
+        if not user_stripped:
+            system_reply = "Session name cannot be empty. Please enter a valid name:"
+            return {"reply": system_reply, "status": "Not Started", "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
+
         target_path = get_file_path(user_stripped)
         
+        # Scenario A: Session already exists
         if os.path.exists(target_path):
-            SESSION_STATE["stage"] = -1
-            SESSION_STATE["pending_name"] = user_stripped
-            return {
-                "reply": f"Warning: A session named '{user_stripped}' already exists. Do you want to 'Overwrite' or 'Continue'?",
-                "status": "Not Started",
-                "session_name": "",  # Keep empty so App.jsx doesn't move URL yet
-                "user_time": user_log_time,
-                "system_time": get_server_time()
-            }
-        
-        SESSION_STATE["session_name"] = user_stripped
-        SESSION_STATE["stage"] = 1  
-        system_reply = f"Session set to '{user_stripped}'. What standard bus are you using?"
-        system_time = get_server_time()
-        
-        append_to_log("user", user_stripped, user_log_time, 0)
-        append_to_log("system", system_reply, system_time, 1)
-        
-        return {
-            "reply": system_reply,
-            "status": "ACTIVE",
-            "session_name": user_stripped,
-            "user_time": user_log_time,
-            "system_time": system_time
-        }
-
-    # ----------------------------------------------------------------------
-    # STAGE -1: CONFLICT CHOICE RESOLUTION
-    # ----------------------------------------------------------------------
-    elif current_stage == -1:
-        chosen_name = SESSION_STATE["pending_name"]
-        
-        if "overwrite" in user_message:
-            SESSION_STATE["session_name"] = chosen_name
-            SESSION_STATE["pending_name"] = ""
-            SESSION_STATE["stage"] = 1
-            
-            target_path = get_file_path(chosen_name)
-            if os.path.exists(target_path):
-                os.remove(target_path)
-                
-            system_reply = f"Previous session logs wiped. Fresh session set to '{chosen_name}'. What standard bus are you using?"
+            system_reply = f"Session '{user_stripped}' already exists. Would you like to OVERWRITE or CONTINUE?"
             system_time = get_server_time()
             
-            append_to_log("user", chosen_name, user_log_time, 0)
-            append_to_log("system", system_reply, system_time, 1)
+            # Create the file pointer tracking state 0 (pending action)
+            append_to_log(user_stripped, "user", user_stripped, user_log_time, 0)
+            append_to_log(user_stripped, "system", system_reply, system_time, 0)
             
-            return {
-                "reply": system_reply,
-                "status": "ACTIVE",
-                "session_name": chosen_name, # Locks it in! URL shifts now
-                "user_time": user_log_time,
-                "system_time": system_time
-            }
-            
-        elif "continue" in user_message:
-            SESSION_STATE["session_name"] = chosen_name
-            SESSION_STATE["pending_name"] = ""
-            
-            target_path = get_file_path(chosen_name)
-            parsed_history = []
-            last_recorded_stage = 1
-            last_recorded_bus = ""
-            
+            return {"reply": system_reply, "status": "Not Started", "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
+        
+        # Scenario B: Session is new and completely free
+        else:
+            system_reply = f"Session set to '{user_stripped}'. What standard bus are you using?"
+            system_time = get_server_time()
+            append_to_log(user_stripped, "user", user_stripped, user_log_time, 1)
+            append_to_log(user_stripped, "system", system_reply, system_time, 1)
+            return {"reply": system_reply, "status": user_stripped, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
+
+    # Fetch recorded history layout parameters
+    state = get_session_state_from_file(session_name)
+    current_stage = state["stage"]
+
+    # --- PHASE 2: CONFLICT RESOLUTION (OVERWRITE OR CONTINUE) ---
+    if current_stage == 0:
+        if user_message == "overwrite":
+            # Destroy local file log completely
             try:
-                with open(target_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if line.strip():
-                            entry = json.loads(line.strip())
-                            parsed_history.append({
-                                "sender": entry["sender"],
-                                "content": entry["content"],
-                                "timestamp": entry["timestamp"]
-                            })
-                            last_recorded_stage = entry.get("stage", 1)
-                            if last_recorded_stage >= 2 and entry["sender"] == "user" and entry["content"].isdigit():
-                                last_recorded_bus = entry["content"]
-            except Exception as e:
-                print(f"Error reading history file: {e}")
+                os.remove(get_file_path(session_name))
+            except:
+                pass
             
-            SESSION_STATE["stage"] = last_recorded_stage
-            if last_recorded_bus:
-                SESSION_STATE["bus_system"] = last_recorded_bus
-                
-            return {
-                "reply": "Restoring state...",
-                "status": "ACTIVE",
-                "session_name": chosen_name, # Locks it in! URL shifts now
-                "history": parsed_history,
-                "user_time": user_log_time,
-                "system_time": get_server_time()
-            }
+            system_reply = "Previous session cleared. What standard bus are you using?"
+            system_time = get_server_time()
+            append_to_log(session_name, "system", system_reply, system_time, 1)
+            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+            
+        elif user_message == "continue":
+            # Reconstruct entire chat timeline directly back to user
+            system_time = get_server_time()
+            
+            # Log the explicit invocation to continue
+            append_to_log(session_name, "user", user_stripped, user_log_time, 1) 
+            
+            # Advance structural internal sequence out of stage 0 safely
+            state_correction = get_session_state_from_file(session_name)
+            active_stage = state_correction["stage"] if state_correction["stage"] != 0 else 1
+            append_to_log(session_name, "system", "Resuming session pipeline...", system_time, active_stage)
+            
+            refreshed_history = get_full_history(session_name)
+            return {"history": refreshed_history, "status": session_name, "session_name": session_name}
         
         else:
-            return {
-                "reply": "Command unrecognized. Please respond explicitly with 'Overwrite' or 'Continue':",
-                "status": "Not Started",
-                "session_name": "",
-                "user_time": user_log_time,
-                "system_time": get_server_time()
-            }
+            system_reply = "Invalid option. Please specify 'overwrite' or 'continue':"
+            system_time = get_server_time()
+            append_to_log(session_name, "user", user_stripped, user_log_time, 0)
+            append_to_log(session_name, "system", system_reply, system_time, 0)
+            return {"reply": system_reply, "status": "Not Started", "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
-    # ----------------------------------------------------------------------
-    # STAGE 1: BUS LOADING
-    # ----------------------------------------------------------------------
+    # --- PHASE 3: STAGE 1 (BUS SYSTEM LOADING) ---
     elif current_stage == 1:
         if user_stripped.isdigit():
-            SESSION_STATE["bus_system"] = user_stripped
-            SESSION_STATE["stage"] = 2  
             system_reply = f"{user_stripped} bus system is loaded and ready !!!"
             system_time = get_server_time()
-            
-            append_to_log("user", user_stripped, user_log_time, 1)
-            append_to_log("system", system_reply, system_time, 2)
-            
-            return {"reply": system_reply, "status": "ACTIVE", "session_name": SESSION_STATE["session_name"], "user_time": user_log_time, "system_time": system_time}
+            append_to_log(session_name, "user", user_stripped, user_log_time, 1)
+            append_to_log(session_name, "system", system_reply, system_time, 2)
+            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
         else:
             system_reply = "Please enter a valid numeric bus standard designation (e.g., 33):"
             system_time = get_server_time()
-            append_to_log("user", user_stripped, user_log_time, 1)
-            append_to_log("system", system_reply, system_time, 1)
-            return {"reply": system_reply, "status": "ACTIVE", "session_name": SESSION_STATE["session_name"], "user_time": user_log_time, "system_time": system_time}
+            append_to_log(session_name, "user", user_stripped, user_log_time, 1)
+            append_to_log(session_name, "system", system_reply, system_time, 1)
+            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
-    # ----------------------------------------------------------------------
-    # STAGE 2: STEADY STATE ACTIVE COMMANDS
-    # ----------------------------------------------------------------------
+    # --- PHASE 4: STAGE 2 (ACTIVE COMMAND ARCHITECTURE) ---
     else:
         if "isolate" in user_message:
-            clean_cmd = user_message.replace("isolate", "").strip()
-            response = f"Isolating buses {clean_cmd}. Network is updated."
+            response = f"Isolating buses {user_message.replace('isolate', '').strip()}. Network updated."
         elif "reset network" in user_message:
-            response = "Network is resetted to original state."
-        elif "power factor" in user_message:
-            response = "Displaying Power Factor graph ..."
-        elif "reset parameters" in user_message:
-            response = "Parameters are resetted to default values."
-        elif "smiley" in user_message:
-            response = "Smiley Face diagram is getting displayed ..."
+            response = "Network resetted."
         else:
-            response = "Command not recognized. Try 'Isolate', 'Reset', or 'Power Factor'."
+            response = "Command not recognized."
             
         system_time = get_server_time()
-        append_to_log("user", user_stripped, user_log_time, 2)
-        append_to_log("system", response, system_time, 2)
-            
-        return {"reply": response, "status": "ACTIVE", "session_name": SESSION_STATE["session_name"], "user_time": user_log_time, "system_time": system_time}
+        append_to_log(session_name, "user", user_stripped, user_log_time, 2)
+        append_to_log(session_name, "system", response, system_time, 2)
+        return {"reply": response, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}

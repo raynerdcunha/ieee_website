@@ -18,20 +18,25 @@ function App() {
           });
           const data = await response.json();
 
-          if (data.status === "INVALID") {
-            window.history.pushState(null, '', '/');
+          // FIX: Catch both INVALID name length AND a missing session file!
+          if (data.status === "INVALID" || data.status === "NOT_FOUND") {
+            window.history.pushState(null, '', '/'); // Strip the /session1 slug away
             setSessionStatus("Not Started");
             setSessionName("");
+            
+            // Seed the chat with the init failure message
             setInitialData({
-              reply: `Session rejected: ${data.reply}`,
+              reply: data.status === "INVALID" ? `Session rejected: ${data.reply}` : `Redirected: ${data.reply}`,
               timestamp: data.timestamp
             });
           } else {
-            setSessionStatus(data.status);
+            // If the session was found, set its status and hydrate history
+            setSessionStatus("Active"); // Or use data.session_name / "Active"
             setSessionName(data.session_name || pathSlug);
             setInitialData(data);
           }
         } else {
+          // Normal bootup at localhost:5173/ with no parameter
           const response = await fetch("http://127.0.0.1:8000/api/init", {
             method: "GET",
             headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
