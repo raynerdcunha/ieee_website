@@ -26,10 +26,32 @@
   --border-user-bubble: rgba(59, 130, 246, 0.3);
   --bg-system-bubble: rgba(15, 23, 42, 0.4);
   --border-system-bubble: rgba(30, 41, 59, 0.6);
-  --bg-pill: #1e293b;
-  --hover-pill: #334155;
-  --text-pill: #cbd5e1;
-  --border-pill: #334155;
+
+  --bg-pill-isolate: #1e293b;
+  --text-pill-isolate: #f1f5f9;
+  --border-pill-isolate: #334155;
+  --hover-pill-isolate: #334155;
+
+  --bg-pill-reset-n: #1e293b;
+  --text-pill-reset-n: #f1f5f9;
+  --border-pill-reset-n: #334155;
+  --hover-pill-reset-n: #334155;
+
+  --bg-pill-reset-p: #1e293b;
+  --text-pill-reset-p: #f1f5f9;
+  --border-pill-reset-p: #334155;
+  --hover-pill-reset-p: #334155;
+
+  --bg-pill-smiley: #1e293b;
+  --text-pill-smiley: #ca8a04;   /* UPDATED: Saturated Gold font color */
+  --border-pill-smiley: #ca8a04; /* UPDATED: Saturated Gold border */
+  --hover-pill-smiley: #334155;
+
+  --bg-pill-p-factor: #1e293b;
+  --text-pill-p-factor: #f1f5f9;
+  --border-pill-p-factor: #334155;
+  --hover-pill-p-factor: #334155;
+
   --bg-input: #020617;
   --text-input: #34d399;
   --placeholder-input: #475569;
@@ -57,10 +79,30 @@
   --border-system-bubble: #cbd5e1;
 
   /* Pills/Buttons: Clean, clickable, distinct */
-  --bg-pill: #e2e8f0;
-  --hover-pill: #d1d5db;
-  --text-pill: #475569;
-  --border-pill: #cbd5e1;
+  --bg-pill-isolate: #e2e8f0;
+  --text-pill-isolate: #d1d5db;
+  --border-pill-isolate: #475569;
+  --hover-pill-isolate: #cbd5e1;
+
+  --bg-pill-reset-n: #e2e8f0;
+  --text-pill-reset-n: #d1d5db;
+  --border-pill-reset-n: #475569;
+  --hover-pill-reset-n: #cbd5e1;
+
+  --bg-pill-reset-p: #e2e8f0;
+  --text-pill-reset-p: #d1d5db;
+  --border-pill-reset-p: #475569;
+  --hover-pill-reset-p: #cbd5e1;
+
+  --bg-pill-smiley: #e2e8f0;
+  --text-pill-smiley: #facc15;   /* UPDATED: Vibrant Amber font color */
+  --border-pill-smiley: #facc15; /* UPDATED: Vibrant Amber border */
+  --hover-pill-smiley: #cbd5e1;
+
+  --bg-pill-p-factor: #e2e8f0;
+  --text-pill-p-factor: #d1d5db;
+  --border-pill-p-factor: #475569;
+  --hover-pill-p-factor: #cbd5e1;
 
   /* Input: Solid white so it feels like an entry field, but with a refined border */
   --bg-input: #ffffff;

@@ -125,20 +125,40 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
       {/* Quick Access Macro Command Selection Grid Buttons */}
       <div className="mt-4 flex-shrink-0">
         <div className="flex flex-wrap gap-2 mb-3">
-          {['Isolate 33,34,35', 'Reset Network', 'Power Factor', 'Reset Parameters'].map((cmd) => (
+          {[
+            { text: 'Isolate 33,34,35', type: 'isolate' },
+            { text: 'Reset Network', type: 'reset-n' },
+            { text: 'Power Factor', type: 'p-factor' },
+            { text: 'Reset Parameters', type: 'reset-p' }
+          ].map((cmd) => (
             <button 
-              key={cmd}
-              onClick={() => handlePillClick(cmd)}
-              className="bg-[var(--bg-pill)] hover:bg-[var(--hover-pill)] text-[11px] px-3 py-1 rounded-full text-[var(--text-pill)] border border-[var(--border-pill)] transition-colors"
+              key={cmd.text}
+              onClick={() => handlePillClick(cmd.text)}
+              style={{
+                backgroundColor: `var(--bg-pill-${cmd.type})`,
+                borderColor: `var(--border-pill-${cmd.type})`,
+                color: `var(--text-pill-${cmd.type})`
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `var(--hover-pill-${cmd.type})`}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `var(--bg-pill-${cmd.type})`}
+              className="text-[11px] px-3 py-1 rounded-full border transition-colors cursor-pointer"
             >
-              {cmd}
+              {cmd.text}
             </button>
           ))}
+          {/* Dedicated Smiley Button mapping to its split variable setup */}
           <button 
             onClick={() => handlePillClick('Display Smiley Face')}
-            className="flex items-center gap-1.5 bg-[var(--bg-pill)] hover:bg-[var(--hover-pill)] text-[11px] px-3 py-1 rounded-full text-[var(--text-pill)] border border-[var(--border-pill)] transition-colors"
+            style={{
+              backgroundColor: 'var(--bg-pill-smiley)',
+              borderColor: 'var(--border-pill-smiley)',
+              color: 'var(--text-pill-smiley)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-pill-smiley)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-pill-smiley)'}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full border transition-colors cursor-pointer"
           >
-            <Smile className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <Smile className="w-3.5 h-3.5" style={{ color: 'var(--text-pill-smiley)' }} />
             Smiley Face
           </button>
         </div>
