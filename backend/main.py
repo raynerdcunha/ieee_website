@@ -1,9 +1,9 @@
+from datetime import datetime
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Enable CORS for your Vite development server
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"], 
@@ -11,30 +11,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory dictionary to manage step-by-step terminal onboarding status
+# ... Keep your top imports and middleware setup identical ...
+
 SESSION_STATE = {
-    "stage": 0,           # 0: Session Name, 1: Bus Standard, 2: Command Mode
+    "stage": 0,           
     "session_name": "",
     "bus_system": ""
 }
 
-# --- ADDED THIS TO FIX THE APP.JSX CONFLICT ---
-@app.get("/api/health")
-async def health_check():
-    """Keeps App.jsx happy so it knows the server is online without overwriting status."""
-    return {"status": "online"}
-
+def get_server_time():
+    return datetime.now().strftime("%I:%M:%S %p")
 
 @app.get("/api/init")
 async def init_endpoint():
-    """Triggered on component load to deliver the welcoming prompt from the backend."""
     SESSION_STATE["stage"] = 0
     SESSION_STATE["session_name"] = ""
     SESSION_STATE["bus_system"] = ""
-    
     return {
         "reply": "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin.",
-        "status": "Not Started"
+        "status": "Not Started",
+        "session_name": "",  # Empty on startup
+        "timestamp": get_server_time()
     }
 
 @app.post("/api/chat")
@@ -44,38 +41,49 @@ async def chat_endpoint(payload: dict = Body(...)):
     user_message = user_stripped.lower()
     
     current_stage = SESSION_STATE["stage"]
-
-    # STAGE 0: Validate Session Name (< 18 characters)
+    user_log_time = get_server_time()
+    
     if current_stage == 0:
         if len(user_stripped) >= 18:
             return {
                 "reply": "Invalid name. Session name must be under 18 characters. Please enter Session Name again:",
-                "status": "Not Started"
+                "status": "Not Started",
+                "session_name": "",
+                "user_time": user_log_time,
+                "system_time": get_server_time()
             }
         else:
             SESSION_STATE["session_name"] = user_stripped
-            SESSION_STATE["stage"] = 1  # Move to next phase
+            SESSION_STATE["stage"] = 1  
             return {
                 "reply": f"Session set to '{user_stripped}'. What standard bus are you using?",
-                "status": "ACTIVE"
+                "status": "ACTIVE",
+                "session_name": SESSION_STATE["session_name"], # Send back the new name
+                "user_time": user_log_time,
+                "system_time": get_server_time()
             }
 
-    # STAGE 1: Validate Bus Number Designation
+    # --- Keep Stage 1 & Stage 2 endpoints identical, just make sure they include: ---
+    # "session_name": SESSION_STATE["session_name"] inside their return dictionaries.
+
     elif current_stage == 1:
         if user_stripped.isdigit():
             SESSION_STATE["bus_system"] = user_stripped
-            SESSION_STATE["stage"] = 2  # Move to general command mode
+            SESSION_STATE["stage"] = 2  
             return {
                 "reply": f"{user_stripped} bus system is loaded and ready !!!",
-                "status": "ACTIVE"
+                "status": "ACTIVE",
+                "user_time": user_log_time,
+                "system_time": get_server_time()
             }
         else:
             return {
                 "reply": "Please enter a valid numeric bus standard designation (e.g., 33):",
-                "status": "ACTIVE"
+                "status": "ACTIVE",
+                "user_time": user_log_time,
+                "system_time": get_server_time()
             }
 
-    # STAGE 2: Standard Analytical Command Operations
     else:
         if "isolate" in user_message:
             clean_cmd = user_message.replace("isolate", "").strip()
@@ -93,5 +101,7 @@ async def chat_endpoint(payload: dict = Body(...)):
             
         return {
             "reply": response,
-            "status": "ACTIVE"
+            "status": "ACTIVE",
+            "user_time": user_log_time,
+            "system_time": get_server_time()
         }
