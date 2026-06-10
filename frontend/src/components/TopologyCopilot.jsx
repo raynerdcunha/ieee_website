@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Zap, GitFork, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef} from 'react';
+import { Zap, GitFork, Send, Smile } from 'lucide-react';
 
 export default function TopologyCopilot({ status }) {
   const [inputValue, setInputValue] = useState('');
@@ -7,6 +7,14 @@ export default function TopologyCopilot({ status }) {
     { sender: 'system', content: 'IEEE 33-Bus System Copilot Terminal online.' }
   ]);
 
+  // Initialize the scroll reference
+  const messagesEndRef = useRef(null);
+
+  // Trigger auto-scroll whenever the messages array updates
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  
   // FIX: This function was missing
   const handlePillClick = (commandText) => {
     setInputValue(commandText);
@@ -57,31 +65,72 @@ export default function TopologyCopilot({ status }) {
       </div>
 
       {/* Terminal Display Output Screen */}
-      <div className="flex-grow bg-slate-950 p-4 rounded-lg font-mono text-xs text-slate-300 border border-slate-900 overflow-y-auto space-y-3 min-h-[350px]">
-        <div className="text-slate-500">/* IEEE 33-Bus System Copilot Terminal online. */</div>
-        <div className="text-emerald-400">rayner@grid-system:~$ Ready for parameter input...</div>
+      <div className="flex-grow bg-[#111a2e] p-4 rounded-lg font-mono text-xs border border-slate-800 overflow-y-auto space-y-4 min-h-[350px]">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}>
+            {m.sender === 'user' ? (
+            <div className="text-right w-full flex justify-end">
+              <div className="bg-blue-900/20 px-4 py-3 rounded-xl rounded-tr-none border border-blue-500/30 font-mono shadow-md text-left max-w-[60%]">
+                <span className="text-[9px] text-blue-400 font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-80">
+                  USER • 12:00:00 PM
+                </span>
+                <div className="text-slate-100 font-mono leading-relaxed break-all">
+                  {m.content}
+                </div>
+              </div>
+            </div>
+          ) : (
+              // System message structure
+              <div className="text-left w-full">
+                <div className="bg-slate-900/40 px-4 py-3 rounded-xl rounded-tl-none border border-slate-800/60 shadow-md w-fit max-w-[75%]">
+                  <span className="text-[9px] text-slate-400 font-mono font-bold tracking-wider uppercase block mb-1.5">
+                    SYSTEM • 12:00:00 PM
+                  </span>
+                  <div className="text-slate-100 font-mono leading-relaxed break-all">
+                    {i === 0 ? "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin." : m.content}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {/* Invisible anchor div for auto-scrolling */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Quick Pills Action Row */}
       <div className="mt-4">
         <div className="flex flex-wrap gap-2 mb-3">
           <button 
-            onClick={() => handlePillClick('Isolate 33, 34, 35')}
+            onClick={() => handlePillClick('Isolate [33, 34, 35]')}
             className="bg-slate-800 hover:bg-slate-700 text-[11px] px-3 py-1 rounded-full text-slate-300 border border-slate-700 transition-colors"
           >
-            Isolate 33, 34, 35
+            Isolate 33,34,35
           </button>
           <button 
-            onClick={() => handlePillClick('Reset Map')}
+            onClick={() => handlePillClick('Reset Network')}
             className="bg-slate-800 hover:bg-slate-700 text-[11px] px-3 py-1 rounded-full text-slate-300 border border-slate-700 transition-colors"
           >
-            Reset Map
+            Reset Network
           </button>
           <button 
             onClick={() => handlePillClick('Power Factor')}
             className="bg-slate-800 hover:bg-slate-700 text-[11px] px-3 py-1 rounded-full text-slate-300 border border-slate-700 transition-colors"
           >
             Power Factor
+          </button>
+          <button 
+            onClick={() => handlePillClick('Reset Parameters')}
+            className="bg-slate-800 hover:bg-slate-700 text-[11px] px-3 py-1 rounded-full text-slate-300 border border-slate-700 transition-colors"
+          >
+            Reset Parameters
+          </button>
+          <button 
+            onClick={() => handlePillClick('Display Smiley Face')}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-[11px] px-3 py-1 rounded-full text-slate-300 border border-slate-700 transition-colors"
+          >
+            <Smile className="w-3.5 h-3.5 text-slate-400" />
+            Smiley Face
           </button>
         </div>
       </div>
@@ -92,11 +141,14 @@ export default function TopologyCopilot({ status }) {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="disconnect [34] or reset |..."
+          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} 
+          placeholder="isolate [34] or reset |..."
           className="flex-grow bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-xs font-mono text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-slate-700"
         />
-        <button className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-blue-400 transition-colors">
-          <Send size={16} /> {/* Make sure to import { Send } from 'lucide-react' */}
+        <button 
+          onClick={handleSendMessage} 
+          className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-blue-400 transition-colors cursor-pointer">
+          <Send size={16} />
         </button>
       </div>
     </div>
