@@ -86,15 +86,19 @@
   }
 }
 
-/* --- THEME-SPECIFIC ICON VIBRANCY --- */
+/* --- ICON THEME CLASSES --- */
 
-/* When the root has data-theme='light', target the Sun icon inside the button */
-[data-theme='light'] button svg {
-  color: #fb923c !important; /* Vibrant Orange */
+.icon-sun {
   transition: all 0.5s ease;
 }
 
-/* Add a hover effect for the Sun icon when in light mode */
-[data-theme='light'] button:hover svg {
-  color: #fbbf24 !important; /* Vibrant Gold/Yellow */
+/* Light theme vibrancy */
+[data-theme='light'] .icon-sun {
+  color: #fb923c;
+}
+
+[data-theme='light'] .icon-sun:hover {
+  color: #fbbf24;
+  /* This brings back the rotation */
+  transform: rotate(135deg);
 }

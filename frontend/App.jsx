@@ -116,7 +116,8 @@ function App() {
               <Moon className="w-4 h-4 text-brand animate-pulse" />
             ) : (
               // SUN: Crisp rotation effect for the "shifting into light" feel
-              <Sun className="w-4 h-4 text-brand transition-transform duration-500 hover:rotate-[135deg]" />
+              // Inside your return statement, look for the Sun component:
+              <Sun className="w-4 h-4 icon-sun" />
             )}
           </button>
         </div>
