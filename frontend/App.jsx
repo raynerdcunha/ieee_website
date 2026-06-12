@@ -111,7 +111,13 @@ function App() {
             onClick={() => setCurrentTheme(currentTheme === "dark" ? "light" : "dark")}
             className="p-2 rounded-lg border border-action bg-action hover:border-subtle text-primary active:scale-95 transition-all"
           >
-            {currentTheme === "dark" ? <Moon className="w-4 h-4 text-brand" /> : <Sun className="w-4 h-4 text-brand" />}
+            {currentTheme === "dark" ? (
+              // MOON: Gentle pulse effect to mimic soft ambient night light
+              <Moon className="w-4 h-4 text-brand animate-pulse" />
+            ) : (
+              // SUN: Crisp rotation effect for the "shifting into light" feel
+              <Sun className="w-4 h-4 text-brand transition-transform duration-500 hover:rotate-[135deg]" />
+            )}
           </button>
         </div>
       </header>

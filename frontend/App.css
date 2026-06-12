@@ -85,3 +85,16 @@
     transform: scale(1); 
   }
 }
+
+/* --- THEME-SPECIFIC ICON VIBRANCY --- */
+
+/* When the root has data-theme='light', target the Sun icon inside the button */
+[data-theme='light'] button svg {
+  color: #fb923c !important; /* Vibrant Orange */
+  transition: all 0.5s ease;
+}
+
+/* Add a hover effect for the Sun icon when in light mode */
+[data-theme='light'] button:hover svg {
+  color: #fbbf24 !important; /* Vibrant Gold/Yellow */
+}
