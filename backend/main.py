@@ -219,3 +219,18 @@ async def chat_endpoint(payload: dict = Body(...)):
         append_to_log(session_name, "user", user_stripped, user_log_time, 2)
         append_to_log(session_name, "system", response, system_time, 2)
         return {"reply": response, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+    
+@app.get("/api/list-sessions")
+async def list_sessions():
+    sessions = []
+    for filename in os.listdir(HISTORY_DIR):
+        if filename.endswith(".jsonl"):
+            path = os.path.join(HISTORY_DIR, filename)
+            mtime = os.path.getmtime(path)
+            sessions.append({
+                "name": filename.replace(".jsonl", ""),
+                "mtime": datetime.fromtimestamp(mtime).strftime("%m/%d/%Y, %I:%M:%S %p")
+            })
+    # Sort by mtime descending (newest first)
+    sessions.sort(key=lambda x: x["mtime"], reverse=True)
+    return sessions

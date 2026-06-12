@@ -102,3 +102,7 @@
   /* This brings back the rotation */
   transform: rotate(135deg);
 }
+
+/* Add to App.css */
+/* No special overrides needed because you are using your existing variables: 
+   --bg-canvas, --border-subtle, --bg-surface, --text-primary, etc. */
