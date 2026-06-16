@@ -227,10 +227,27 @@ async def list_sessions():
         if filename.endswith(".jsonl"):
             path = os.path.join(HISTORY_DIR, filename)
             mtime = os.path.getmtime(path)
+            # Add raw timestamp for frontend processing
             sessions.append({
                 "name": filename.replace(".jsonl", ""),
-                "mtime": datetime.fromtimestamp(mtime).strftime("%m/%d/%Y, %I:%M:%S %p")
+                "mtime_raw": mtime, 
+                "mtime_display": datetime.fromtimestamp(mtime).strftime("%I:%M %p")
             })
-    # Sort by mtime descending (newest first)
-    sessions.sort(key=lambda x: x["mtime"], reverse=True)
+    
+    # Sort by raw timestamp
+    sessions.sort(key=lambda x: x["mtime_raw"], reverse=True)
     return sessions
+
+@app.delete("/api/session/{session_name}")
+async def delete_session_endpoint(session_name: str):
+    clean_name = session_name.strip()
+    target_path = get_file_path(clean_name)
+    
+    if os.path.exists(target_path):
+        try:
+            os.remove(target_path)
+            return {"status": "SUCCESS", "message": f"Session '{clean_name}' successfully deleted."}
+        except Exception as e:
+            return {"status": "ERROR", "message": f"Failed to delete file: {str(e)}"}
+    else:
+        return {"status": "NOT_FOUND", "message": "Session target does not exist."}

@@ -10,6 +10,7 @@
     const [initialData, setInitialData] = useState(null);
     const [currentTheme, setCurrentTheme] = useState("dark");
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [sessionList, setSessionList] = useState([]);
 
     useEffect(() => {
       const initializeSystem = async () => {
@@ -68,6 +69,22 @@
     const handleResetLayout = () => {
       console.log("Resetting topology map...");
     };
+
+    const fetchAllSessions = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/list-sessions");
+        const data = await response.json();
+        setSessionList(data);
+      } catch (err) {
+        console.error("Registry mapping breakdown reaching server filesystem:", err);
+      }
+    };
+
+    useEffect(() => {
+      if (isChatOpen) {
+        fetchAllSessions();
+      }
+    }, [isChatOpen]);
 
     return (
       <div 
@@ -143,8 +160,14 @@
           </div>
         </main>
 
-        {/* 3. CHAT PANEL OVERLAY */}
-        <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+        {/* 3. CHAT PANEL OVERLAY REGISTRY DRAWER */}
+        <ChatPanel 
+          isOpen={isChatOpen} 
+          onClose={() => setIsChatOpen(false)} 
+          sessions={sessionList} 
+          currentSessionName={sessionName}
+          onDeleteSuccess={fetchAllSessions} // Wire up instant callback updates on file drops
+        />
       </div>
     );
   }
