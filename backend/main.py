@@ -16,7 +16,8 @@ app.add_middleware(
 HISTORY_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "chat-history"))
 
 def get_server_time():
-    return datetime.now().strftime("%I:%M:%S %p")
+    """Captures absolute date as MM/DD/YYYY along with the active time tracking layout."""
+    return datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
 def get_file_path(session_name: str) -> str:
     if not os.path.exists(HISTORY_DIR):
@@ -75,7 +76,6 @@ def get_session_state_from_file(session_name: str):
             for line in f:
                 if line.strip():
                     entry = json.loads(line.strip())
-                    # FIXED: Safely grab the absolute latest stage written to log
                     if "stage" in entry:
                         last_stage = entry["stage"]
                     if entry["sender"] == "user" and entry["content"].isdigit():
@@ -201,7 +201,6 @@ async def chat_endpoint(payload: dict = Body(...)):
 
     # --- PHASE 4: STAGE 2 (ACTIVE COMMAND ARCHITECTURE) ---
     else:
-        # FIXED: Added support for all backend commands mapping to frontend pill actions
         if "isolate" in user_message:
             response = f"Isolating buses {user_message.replace('isolate', '').strip()}. Network updated."
         elif "reset network" in user_message:
@@ -227,11 +226,11 @@ async def list_sessions():
         if filename.endswith(".jsonl"):
             path = os.path.join(HISTORY_DIR, filename)
             mtime = os.path.getmtime(path)
-            # Add raw timestamp for frontend processing
+            # Standardized layout representation to synchronize with active log outputs
             sessions.append({
                 "name": filename.replace(".jsonl", ""),
                 "mtime_raw": mtime, 
-                "mtime_display": datetime.fromtimestamp(mtime).strftime("%I:%M %p")
+                "mtime_display": datetime.fromtimestamp(mtime).strftime("%m/%d/%Y %I:%M:%S %p")
             })
     
     # Sort by raw timestamp
