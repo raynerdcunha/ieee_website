@@ -1,0 +1,109 @@
+/* src/styles/ChatPanel.css */
+
+/* 1. STRUCTURAL VARIABLE DESIGN TOKENS */
+[data-theme='dark'] {
+  --cp-bg-drawer: #0d1527;
+  --cp-bg-card-active: rgba(30, 58, 138, 0.4);
+  --cp-border-card-active: rgba(29, 78, 216, 0.5);
+  --cp-bg-card-idle: rgba(15, 23, 42, 0.4);
+  --cp-border-card-idle: rgba(30, 41, 59, 0.6);
+  --cp-hover-card-idle: #1e293b;
+  --cp-text-main: #f1f5f9;
+  --cp-text-muted: #94a3b8;
+  --cp-border-split: #1e293b;
+  --cp-bg-input-box: rgba(2, 6, 23, 0.6);
+}
+
+[data-theme='light'] {
+  --cp-bg-drawer: #f8fafc;
+  --cp-bg-card-active: #e0e7ff;
+  --cp-border-card-active: #c7d2fe;
+  --cp-bg-card-idle: #ffffff;
+  --cp-border-card-idle: #e2e8f0;
+  --cp-hover-card-idle: #f1f5f9;
+  --cp-text-main: #1e293b;
+  --cp-text-muted: #64748b;
+  --cp-border-split: #cbd5e1;
+  --cp-bg-input-box: #f1f5f9;
+}
+
+/* 2. SLIDING COMPONENT HOOK LAYERS */
+.cp-drawer {
+  background-color: var(--cp-bg-drawer);
+  border-color: var(--cp-border-split);
+  color: var(--cp-text-main);
+}
+
+.cp-header {
+  border-color: var(--cp-border-split);
+}
+
+.cp-header-title {
+  color: var(--cp-text-main);
+}
+
+.cp-close-btn {
+  color: var(--cp-text-muted);
+}
+.cp-close-btn:hover {
+  color: var(--cp-text-main);
+}
+
+.cp-action-container {
+  border-color: var(--cp-border-split);
+}
+
+.cp-section-tag {
+  color: var(--cp-text-muted);
+}
+
+/* 3. INTERACTIVE HISTORY CARD ELEMENTS */
+.cp-history-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.cp-history-card.active {
+  background-color: var(--cp-bg-card-active);
+  border-color: var(--cp-border-card-active);
+  color: var(--cp-text-main);
+}
+
+.cp-history-card.idle {
+  background-color: var(--cp-bg-card-idle);
+  border-color: var(--cp-border-card-idle);
+  color: var(--cp-text-muted);
+}
+
+.cp-history-card.idle:hover {
+  background-color: var(--cp-hover-card-idle);
+  color: var(--cp-text-main);
+}
+
+.cp-card-title {
+  color: var(--cp-text-main);
+}
+
+.cp-card-timestamp {
+  color: var(--cp-text-muted);
+}
+
+.cp-delete-trigger {
+  color: var(--cp-text-muted);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.cp-delete-trigger:hover {
+  color: #f87171 !important;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* 4. MODAL DETACHED PORTAL WRAPPERS */
+.cp-modal-panel {
+  background-color: var(--cp-bg-drawer);
+  border-color: var(--cp-border-split);
+  color: var(--cp-text-main);
+}
+
+.cp-modal-target-box {
+  background-color: var(--cp-bg-input-box);
+  border-color: var(--cp-border-split);
+}

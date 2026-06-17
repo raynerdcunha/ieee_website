@@ -80,27 +80,28 @@
 
   /* Pills/Buttons: Clean, clickable, distinct */
   --bg-pill-isolate: #e2e8f0;
-  --text-pill-isolate: #d1d5db;
+  --text-pill-isolate: #475569;    /* FIXED: High contrast dark slate font */
   --border-pill-isolate: #475569;
   --hover-pill-isolate: #cbd5e1;
 
   --bg-pill-reset-n: #e2e8f0;
-  --text-pill-reset-n: #d1d5db;
+  --text-pill-reset-n: #475569;    /* FIXED: High contrast dark slate font */
   --border-pill-reset-n: #475569;
   --hover-pill-reset-n: #cbd5e1;
 
   --bg-pill-reset-p: #e2e8f0;
-  --text-pill-reset-p: #d1d5db;
+  --text-pill-reset-p: #475569;    /* FIXED: High contrast dark slate font */
   --border-pill-reset-p: #475569;
   --hover-pill-reset-p: #cbd5e1;
 
-  --bg-pill-smiley: #e2e8f0;
-  --text-pill-smiley: #facc15;   /* UPDATED: Vibrant Amber font color */
-  --border-pill-smiley: #facc15; /* UPDATED: Vibrant Amber border */
-  --hover-pill-smiley: #cbd5e1;
+  /* Inside [data-theme='light'] */
+  --bg-pill-smiley: #f0f2fe;     /* Soft, tinted indigo background */
+  --text-pill-smiley: #4f46e5;   /* Deep, crisp indigo text (High contrast) */
+  --border-pill-smiley: #818cf8; /* Vibrant indigo accent border */
+  --hover-pill-smiley: #e0e4fe;
 
   --bg-pill-p-factor: #e2e8f0;
-  --text-pill-p-factor: #d1d5db;
+  --text-pill-p-factor: #475569;    /* FIXED: High contrast dark slate font */
   --border-pill-p-factor: #475569;
   --hover-pill-p-factor: #cbd5e1;
 
