@@ -364,12 +364,14 @@ function App() {
       {/* --- CUSTOM OVERLAY MODAL: Branch Chat Session --- */}
       {branchModalOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setBranchModalOpen(false)} />
-          <div className="relative w-full max-w-sm bg-slate-900 dark:bg-[#070D1E] border border-slate-800 rounded-2xl shadow-2xl p-6 text-slate-100 z-10 flex flex-col gap-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-blue-400 font-sans">
+          <div className="absolute inset-0 bg-backdrop-mask backdrop-blur-sm" onClick={() => setBranchModalOpen(false)} />
+          <div 
+            className="relative w-full max-w-sm bg-canvas border-subtle rounded-2xl shadow-2xl p-6 text-primary z-10 flex flex-col gap-4"
+          >
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand font-sans">
               Branch Chat Session
             </h3>
-            <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
+            <p className="text-[11px] text-secondary font-sans leading-relaxed">
               Enter a unique name to clone your ongoing simulation history into a separate parallel session trace.
             </p>
             
@@ -380,11 +382,11 @@ function App() {
                 onChange={(e) => setBranchNameInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submitBranchSession()}
                 placeholder="Branch name..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
+                className="w-full bg-surface border-subtle rounded-xl py-2 px-3 text-xs font-mono text-primary focus:outline-none focus:border-brand-color"
                 maxLength={17}
               />
               {branchError && (
-                <span className="text-[10px] text-red-400 font-semibold font-sans px-1 mt-1">
+                <span className="text-[10px] text-error font-semibold font-sans px-1 mt-1">
                   ⚠️ {branchError}
                 </span>
               )}
@@ -394,14 +396,14 @@ function App() {
               <button
                 type="button"
                 onClick={() => setBranchModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer font-sans"
+                className="px-4 py-2 rounded-xl border-subtle bg-surface hover:opacity-80 text-primary transition-all cursor-pointer font-sans"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={submitBranchSession}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-colors cursor-pointer font-sans"
+                className="px-4 py-2 rounded-xl bg-confirm-btn hover:opacity-90 text-white transition-all cursor-pointer font-sans"
               >
                 Confirm Branch
               </button>

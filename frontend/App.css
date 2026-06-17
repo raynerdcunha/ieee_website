@@ -19,6 +19,10 @@
   --bg-telemetry-fill: #059669;
   --border-action: #1e293b;
   --bg-action: rgba(2, 6, 23, 0.6);
+  --focus-brand-border: #3b82f6;
+  --bg-confirm: #2563eb;
+  --bg-backdrop-mask: rgba(0, 0, 0, 0.6);
+  --text-error: #f87171;
 }
 
 /* --- THEME: LIGHT --- */
@@ -37,6 +41,10 @@
   --bg-telemetry-fill: #065f46;
   --border-action: #cbd5e1;
   --bg-action: #ffffff;
+  --focus-brand-border: #1d4ed8;
+  --bg-confirm: #1d4ed8;
+  --bg-backdrop-mask: rgba(15, 23, 42, 0.4);
+  --text-error: #ef4444;
 }
 
 /* --- UTILITY CLASSES --- */
@@ -55,6 +63,12 @@
 .bg-telemetry-fill { background-color: var(--bg-telemetry-fill); }
 .border-action     { border: 1px solid var(--border-action); }
 .bg-action         { background-color: var(--bg-action); }
+
+/* Custom Additions safely bound to input selectors */
+.focus-border-brand-color:focus { border-color: var(--focus-brand-border) !important; }
+.bg-confirm-btn { background-color: var(--bg-confirm); }
+.bg-backdrop-mask { background-color: var(--bg-backdrop-mask); }
+.text-error { color: var(--text-error); }
 
 /* --- SHARED CONSTANTS --- */
 .status-inactive { background-color: rgba(153, 27, 27, 0.3); color: #f87171; }
@@ -87,7 +101,6 @@
 }
 
 /* --- ICON THEME CLASSES --- */
-
 .icon-sun {
   transition: all 0.5s ease;
 }
@@ -102,7 +115,3 @@
   /* This brings back the rotation */
   transform: rotate(135deg);
 }
-
-/* Add to App.css */
-/* No special overrides needed because you are using your existing variables: 
-   --bg-canvas, --border-subtle, --bg-surface, --text-primary, etc. */

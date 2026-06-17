@@ -46,12 +46,8 @@ export default function TopologyCopilot({
     setInputValue(''); 
 
     try {
-      // Maps to your session specific endpoint matching your App.jsx routing logic
-      const targetUrl = sessionName 
-        ? `http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionName)}/message`
-        : "http://127.0.0.1:8000/api/message";
-
-      const response = await fetch(targetUrl, {
+      // FIXED: Pointing directly to /api/chat to match your main.py
+      const response = await fetch("http://127.0.0.1:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -91,10 +87,7 @@ export default function TopologyCopilot({
   return (
     <div data-theme={currentTheme} className="bg-[var(--copilot-bg-outer)] rounded-xl p-4 border border-[var(--copilot-border-outer)] shadow-xl flex flex-col h-full w-full overflow-hidden">
       
-      {/* Header telemetry metadata metrics row */}
       <div className="flex items-center justify-between gap-2 mb-4 w-full flex-shrink-0 border-b border-[var(--copilot-border-inner)] pb-3">
-        
-        {/* Left Group: Topology Copilot title and Session badge */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-orange-600 text-xs md:text-sm flex-shrink-0">🤖</span>
@@ -103,7 +96,6 @@ export default function TopologyCopilot({
             </h2>
           </div>
 
-          {/* Session Status Badge */}
           <span className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded-full border whitespace-nowrap ${
             status === "Not Started" 
               ? "bg-[var(--copilot-bg-status-inactive)] text-[var(--copilot-text-status-inactive)] border-red-800/50" 
@@ -116,7 +108,6 @@ export default function TopologyCopilot({
           </span>
         </div>
 
-        {/* Right Group: Reconfigured Interactive Branch Chat Button Badge */}
         <div className="flex-shrink-0">
           <button
             type="button"
@@ -133,13 +124,10 @@ export default function TopologyCopilot({
             <span className="inline">Branch Chat</span>
           </button>
         </div>
-
       </div>
 
-      {/* Localized contained scroll view container frame */}
       <div className="flex-grow h-0 min-h-0 bg-[var(--copilot-bg-inner)] p-4 rounded-lg font-mono text-xs md:text-sm border border-[var(--copilot-border-inner)] overflow-y-auto space-y-4 custom-scrollbar">
         {messages.map((m, i) => {
-          // Normalize sender check to safely parse both 'user' vs 'sender' formats
           const isUser = m.sender === 'user' || m.role === 'user';
           const msgContent = m.content || m.text;
           const msgTime = m.timestamp;
@@ -175,7 +163,6 @@ export default function TopologyCopilot({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Access Macro Command Selection Grid Buttons */}
       <div className="mt-4 flex-shrink-0">
         <div className="flex flex-wrap gap-2 mb-3 max-h-[120px] overflow-y-auto custom-scrollbar">
           {[
@@ -201,7 +188,6 @@ export default function TopologyCopilot({
             </button>
           ))}
           
-          {/* Dedicated Smiley Button mapping to its split variable setup */}
           <button 
             type="button"
             onClick={() => handlePillClick('Display Smiley Face')}
@@ -220,7 +206,6 @@ export default function TopologyCopilot({
         </div>
       </div>
 
-      {/* Input Entry Prompt Command Execution Frame */}
       <div className="flex gap-2 items-center w-full mt-2 flex-shrink-0">
         <input 
           type="text"
