@@ -23,6 +23,11 @@
   --bg-confirm: #2563eb;
   --bg-backdrop-mask: rgba(0, 0, 0, 0.6);
   --text-error: #f87171;
+  
+  /* Draggable Handle Specific Variables */
+  --handle-bg: rgba(51, 65, 85, 0.6);
+  --handle-hover: rgba(96, 165, 250, 0.8);
+  --handle-active: #60a5fa;
 }
 
 /* --- THEME: LIGHT --- */
@@ -45,6 +50,11 @@
   --bg-confirm: #1d4ed8;
   --bg-backdrop-mask: rgba(15, 23, 42, 0.4);
   --text-error: #ef4444;
+
+  /* Draggable Handle Specific Variables */
+  --handle-bg: rgba(203, 213, 225, 0.8);
+  --handle-hover: rgba(29, 78, 216, 0.8);
+  --handle-active: #1d4ed8;
 }
 
 /* --- UTILITY CLASSES --- */
@@ -53,6 +63,7 @@
 .text-primary      { color: var(--text-primary); }
 .text-secondary    { color: var(--text-secondary); }
 .border-subtle     { border: 1px solid var(--border-subtle); }
+.border-b          { border-bottom: 1px solid var(--border-subtle); }
 .bg-surface        { background-color: var(--bg-surface); }
 .icon-muted        { color: var(--icon-muted); }
 .bg-brand-soft     { background-color: var(--bg-brand-soft); }
@@ -63,6 +74,20 @@
 .bg-telemetry-fill { background-color: var(--bg-telemetry-fill); }
 .border-action     { border: 1px solid var(--border-action); }
 .bg-action         { background-color: var(--bg-action); }
+
+/* --- FIX: VISIBLE DRAG HANDLES STYLING TRACE --- */
+.bg-subtle\/50, .bg-subtle\/60 {
+  background-color: var(--handle-bg) !important;
+}
+
+/* Emulate Tailwind group behaviors natively for custom css fallback */
+.group:hover .rounded-full {
+  background-color: var(--handle-hover) !important;
+}
+
+.group:active .rounded-full {
+  background-color: var(--handle-active) !important;
+}
 
 /* Custom Additions safely bound to input selectors */
 .focus-border-brand-color:focus { border-color: var(--focus-brand-border) !important; }
@@ -82,7 +107,7 @@
 
 .telemetry-pulse {
   animation: pulse-ring 2s ease-in-out infinite;
-  overflow: visible !important; /* Force it to show outside the parent */
+  overflow: visible !important; 
 }
 
 @keyframes pulse-ring {
@@ -112,6 +137,5 @@
 
 [data-theme='light'] .icon-sun:hover {
   color: #fbbf24;
-  /* This brings back the rotation */
   transform: rotate(135deg);
 }
