@@ -2,14 +2,15 @@ import os
 import json
 import shutil
 from datetime import datetime
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body  # <-- FIXED: Added Body here
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -127,7 +128,6 @@ async def chat_endpoint(payload: dict = Body(...)):
     user_message = user_stripped.lower()
     user_log_time = get_server_time()
 
-    # --- PHASE 1: STAGE 0 - RECEIVING & VALIDATING SESSION NAME ---
     if not session_name:
         if len(user_stripped) >= 18:
             system_reply = "Session name must be under 18 characters. Try again:"
@@ -155,7 +155,6 @@ async def chat_endpoint(payload: dict = Body(...)):
     state = get_session_state_from_file(session_name)
     current_stage = state["stage"]
 
-    # --- PHASE 2: CONFLICT RESOLUTION (OVERWRITE OR CONTINUE) ---
     if current_stage == 0:
         if user_message == "overwrite":
             try:
@@ -171,12 +170,9 @@ async def chat_endpoint(payload: dict = Body(...)):
         elif user_message == "continue":
             system_time = get_server_time()
             
-            # --- FIXED ORDER OF OPERATIONS (POINT 3) ---
-            # 1. Pull current true state from history lines BEFORE logging anything new
             state_correction = get_session_state_from_file(session_name)
             active_stage = state_correction["stage"] if state_correction["stage"] != 0 else 1
             
-            # 2. Append lines using the synchronized active stage variable
             append_to_log(session_name, "user", user_stripped, user_log_time, active_stage) 
             append_to_log(session_name, "system", "Resuming session pipeline...", system_time, active_stage)
             
@@ -189,7 +185,6 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(session_name, "system", system_reply, system_time, 0)
             return {"reply": system_reply, "status": "Not Started", "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
-    # --- PHASE 3: STAGE 1 (BUS SYSTEM LOADING) ---
     elif current_stage == 1:
         if user_stripped.isdigit():
             system_reply = f"{user_stripped} bus system is loaded and ready !!!"
@@ -204,7 +199,6 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(session_name, "system", system_reply, system_time, 1)
             return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
-    # --- PHASE 4: STAGE 2 (ACTIVE COMMAND ARCHITECTURE) ---
     else:
         if "isolate" in user_message:
             response = f"Isolating buses {user_message.replace('isolate', '').strip()}. Network updated."
@@ -256,30 +250,45 @@ async def delete_session_endpoint(session_name: str):
     else:
         return {"status": "NOT_FOUND", "message": "Session target does not exist."}
 
-# --- SYSTEM CLONING PIPELINE ENDPOINT ---
 @app.post("/api/session/{source_name}/branch")
 async def branch_session_endpoint(source_name: str, payload: dict = Body(...)):
     clean_source = source_name.strip()
     new_name = payload.get("name", "").strip()
     
-    # Validation Check 1: Enforce strict character limits
     if not new_name or len(new_name) >= 18:
         return {"status": "INVALID", "message": "Branch name must be between 1 and 17 characters."}
         
     source_path = get_file_path(clean_source)
     target_path = get_file_path(new_name)
     
-    # Validation Check 2: Verify if the source file actually exists to branch from
     if not os.path.exists(source_path):
         return {"status": "NOT_FOUND", "message": f"Source tracking log '{clean_source}' could not be located."}
         
-    # Validation Check 3: Prevent destructive file overwrites if the targeted name exists
     if os.path.exists(target_path):
         return {"status": "EXISTS", "message": f"A data stream named '{new_name}' already exists."}
         
-    # Execution Phase: Perform the hardware log duplication pipeline
     try:
         shutil.copyfile(source_path, target_path)
         return {"status": "SUCCESS", "new_session": new_name}
     except Exception as e:
         return {"status": "ERROR", "message": f"File system collision replicating trace: {str(e)}"}
+    
+@app.get("/api/compare")
+async def compare_sessions(s1: str, s2: str, s3: str):
+    """
+    Retrieves history for three parallel simulation sessions.
+    """
+    try:
+        # FIXED: Changed get_session_history to get_full_history to match your file's helper name
+        return {
+            "s1": {"history": get_full_history(s1)},
+            "s2": {"history": get_full_history(s2)},
+            "s3": {"history": get_full_history(s3)}
+        }
+    except Exception as e:
+        print(f"Error fetching compare data: {e}")
+        return {
+            "s1": {"history": []},
+            "s2": {"history": []},
+            "s3": {"history": []}
+        }

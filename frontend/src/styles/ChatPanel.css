@@ -1,5 +1,3 @@
-/* src/styles/ChatPanel.css */
-
 /* 1. ARCHITECTURAL ISOLATION RULES (DARK THEME) */
 [data-theme='dark'] .cp-drawer,
 [data-theme='dark'] .cp-modal-panel,
@@ -15,6 +13,9 @@
   --cp-text-muted: #94a3b8;
   --cp-border-split: #1e293b;
   --cp-bg-input-box: rgba(2, 6, 23, 0.6);
+  --cp-scroller-track: rgba(2, 6, 23, 0.2);
+  --cp-scroller-thumb: #1e293b;
+  --cp-scroller-thumb-hover: #3b82f6;
 }
 
 /* 1. ARCHITECTURAL ISOLATION RULES (LIGHT THEME) */
@@ -32,6 +33,9 @@
   --cp-text-muted: #64748b;
   --cp-border-split: #cbd5e1;
   --cp-bg-input-box: #f1f5f9;
+  --cp-scroller-track: rgba(241, 245, 249, 0.5);
+  --cp-scroller-thumb: #cbd5e1;
+  --cp-scroller-thumb-hover: #1d4ed8;
 }
 
 /* 2. SLIDING COMPONENT HOOK LAYERS */
@@ -121,4 +125,23 @@
 .cp-modal-target-box {
   background-color: var(--cp-bg-input-box);
   border-color: var(--cp-border-split);
+}
+
+/* 5. CUSTOM MATRIX INTELLIGENT SCROLLER ENGINE */
+.cp-scroller-engine::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.cp-scroller-engine::-webkit-scrollbar-track {
+  background: var(--cp-scroller-track);
+}
+
+.cp-scroller-engine::-webkit-scrollbar-thumb {
+  background: var(--cp-scroller-thumb);
+  border-radius: 10px;
+}
+
+.cp-scroller-engine::-webkit-scrollbar-thumb:hover {
+  background: var(--cp-scroller-thumb-hover);
 }

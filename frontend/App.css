@@ -5,137 +5,262 @@
 
 /* --- THEME: DARK --- */
 [data-theme='dark'] {
-  --bg-canvas: #020617;
-  --text-primary: #f1f5f9;
-  --text-secondary: #64748b;
-  --border-subtle: #334155;
-  --bg-surface: rgba(30, 41, 59, 0.4);
-  --icon-muted: #94a3b8;
-  --bg-brand-soft: rgba(30, 58, 138, 0.4);
-  --border-brand: rgba(59, 130, 246, 0.5);
-  --text-brand: #60a5fa;
-  --border-telemetry: rgba(6, 78, 59, 0.4);
-  --text-telemetry: #10b981;
-  --bg-telemetry-fill: #059669;
-  --border-action: #1e293b;
-  --bg-action: rgba(2, 6, 23, 0.6);
-  --focus-brand-border: #3b82f6;
-  --bg-confirm: #2563eb;
-  --bg-backdrop-mask: rgba(0, 0, 0, 0.6);
-  --text-error: #f87171;
+  --bg-layout-canvas: #020617;
+  --text-header-title: #f1f5f9;
+  --text-panel-headers: #f1f5f9;
+  --text-modal-titles: #60a5fa;
+  --text-modal-body: #64748b;
+  --text-header-subtitle: #64748b;
+  --text-panel-subtitles: #64748b;
+  --text-input-labels: #64748b;
   
-  /* Draggable Handle Specific Variables */
-  --handle-bg: rgba(51, 65, 85, 0.6);
-  --handle-hover: rgba(96, 165, 250, 0.8);
-  --handle-active: #60a5fa;
+  /* Structure & Borders */
+  --border-header-edge: #334155;
+  --border-panel-edge: rgba(59, 130, 246, 0.25);
+  --border-modal-edge: #334155;
+  --bg-panel-surface: #0b1329;
+  
+  /* Navigation & Interactive Utility Elements */
+  --bg-nav-button: rgba(2, 6, 23, 0.6);
+  --border-nav-button: #1e293b;
+  --text-nav-button: #f1f5f9;
+  --icon-nav-muted: #94a3b8;
+  --hover-nav-button-bg: rgba(30, 41, 59, 0.8);
+  --hover-nav-button-text: #ffffff;
+
+  /* View Feature Toggles */
+  --bg-action-feature-soft: rgba(30, 58, 138, 0.4);
+  --border-action-feature: rgba(59, 130, 246, 0.4);
+  --text-action-feature: #60a5fa;
+  
+  /* Modals & Inputs */
+  --bg-modal-confirm-button: #2563eb;
+  --text-modal-confirm-button: #ffffff;
+  --hover-modal-confirm-button: #1d4ed8;
+  --bg-form-input: rgba(30, 41, 59, 0.4);
+  --border-form-input: #334155;
+  --text-form-input: #f1f5f9;
+  --focus-form-input-border: #3b82f6;
+  
+  /* Telemetry Network Badge */
+  --bg-telemetry-badge: rgba(6, 78, 59, 0.2);
+  --border-telemetry-badge: rgba(6, 78, 59, 0.4);
+  --text-telemetry-status: #10b981;
+  --bg-telemetry-pulse-dot: #059669;
+  
+  /* Splitter Component Handles */
+  --handle-splitter-bg: rgba(51, 65, 85, 0.6);
+  --handle-splitter-hover: rgba(96, 165, 250, 0.8);
+  --handle-splitter-active: #60a5fa;
+  
+  --bg-modal-backdrop-mask: rgba(0, 0, 0, 0.7);
+  --text-system-error: #f87171;
+  --scrollbar-thumb-bg: #1e293b;
+  --scrollbar-track-bg: rgba(2, 6, 23, 0.2);
 }
 
 /* --- THEME: LIGHT --- */
 [data-theme='light'] {
-  --bg-canvas: #f8fafc;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border-subtle: #cbd5e1;
-  --bg-surface: rgba(241, 245, 249, 0.8);
-  --icon-muted: #475569;
-  --bg-brand-soft: rgba(219, 234, 254, 0.8);
-  --border-brand: rgba(37, 99, 235, 0.3);
-  --text-brand: #1d4ed8;
-  --border-telemetry: rgba(16, 185, 129, 0.3);
-  --text-telemetry: #059669;
-  --bg-telemetry-fill: #065f46;
-  --border-action: #cbd5e1;
-  --bg-action: #ffffff;
-  --focus-brand-border: #1d4ed8;
-  --bg-confirm: #1d4ed8;
-  --bg-backdrop-mask: rgba(15, 23, 42, 0.4);
-  --text-error: #ef4444;
+  --bg-layout-canvas: #f8fafc;
+  --text-header-title: #0f172a;
+  --text-panel-headers: #0f172a;
+  --text-modal-titles: #1d4ed8;
+  --text-modal-body: #475569;
+  --text-header-subtitle: #475569;
+  --text-panel-subtitles: #475569;
+  --text-input-labels: #475569;
+  
+  /* Structure & Borders */
+  --border-header-edge: #cbd5e1;
+  --border-panel-edge: rgba(37, 99, 235, 0.2);
+  --border-modal-edge: #cbd5e1;
+  --bg-panel-surface: #ffffff;
+  
+  /* Navigation & Interactive Utility Elements */
+  --bg-nav-button: #ffffff;
+  --border-nav-button: #cbd5e1;
+  --text-nav-button: #475569;
+  --icon-nav-muted: #475569;
+  --hover-nav-button-bg: #f1f5f9;
+  --hover-nav-button-text: #0f172a;
 
-  /* Draggable Handle Specific Variables */
-  --handle-bg: rgba(203, 213, 225, 0.8);
-  --handle-hover: rgba(29, 78, 216, 0.8);
-  --handle-active: #1d4ed8;
+  /* View Feature Toggles */
+  --bg-action-feature-soft: rgba(219, 234, 254, 0.7);
+  --border-action-feature: rgba(37, 99, 235, 0.3);
+  --text-action-feature: #1d4ed8;
+  
+  /* Modals & Inputs */
+  --bg-modal-confirm-button: #1d4ed8;
+  --text-modal-confirm-button: #ffffff;
+  --hover-modal-confirm-button: #1e40af;
+  --bg-form-input: #ffffff;
+  --border-form-input: #cbd5e1;
+  --text-form-input: #0f172a;
+  --focus-form-input-border: #1d4ed8;
+  
+  /* Telemetry Network Badge */
+  --bg-telemetry-badge: rgba(16, 185, 129, 0.1);
+  --border-telemetry-badge: rgba(16, 185, 129, 0.25);
+  --text-telemetry-status: #059669;
+  --bg-telemetry-pulse-dot: #065f46;
+  
+  /* Splitter Component Handles */
+  --handle-splitter-bg: rgba(203, 213, 225, 0.8);
+  --handle-splitter-hover: rgba(29, 78, 216, 0.8);
+  --handle-splitter-active: #1d4ed8;
+  
+  --bg-modal-backdrop-mask: rgba(15, 23, 42, 0.3);
+  --text-system-error: #ef4444;
+  --scrollbar-thumb-bg: #cbd5e1;
+  --scrollbar-track-bg: rgba(241, 245, 249, 0.5);
 }
 
-/* --- UTILITY CLASSES --- */
-.bg-telemetry      { background-color: var(--text-telemetry); }
-.bg-canvas         { background-color: var(--bg-canvas); }
-.text-primary      { color: var(--text-primary); }
-.text-secondary    { color: var(--text-secondary); }
-.border-subtle     { border: 1px solid var(--border-subtle); }
-.border-b          { border-bottom: 1px solid var(--border-subtle); }
-.bg-surface        { background-color: var(--bg-surface); }
-.icon-muted        { color: var(--icon-muted); }
-.bg-brand-soft     { background-color: var(--bg-brand-soft); }
-.border-brand      { border: 1px solid var(--border-brand); }
-.text-brand        { color: var(--text-brand); }
-.border-telemetry  { border: 1px solid var(--border-telemetry); }
-.text-telemetry    { color: var(--text-telemetry); }
-.bg-telemetry-fill { background-color: var(--bg-telemetry-fill); }
-.border-action     { border: 1px solid var(--border-action); }
-.bg-action         { background-color: var(--bg-action); }
+/* --- INTERFACE CORE LAYOUT UTILITIES --- */
+.bg-canvas { background-color: var(--bg-layout-canvas); }
+.text-primary { color: var(--text-header-title); }
+.text-secondary { color: var(--text-header-subtitle); }
 
-/* --- FIX: VISIBLE DRAG HANDLES STYLING TRACE --- */
-.bg-subtle\/50, .bg-subtle\/60 {
-  background-color: var(--handle-bg) !important;
+.border-b-header { border-bottom: 1px solid var(--border-header-edge); }
+.btn-nav-utility {
+  background-color: var(--bg-nav-button);
+  border: 1px solid var(--border-nav-button);
+  color: var(--text-nav-button);
+}
+.btn-nav-utility:hover {
+  background-color: var(--hover-nav-button-bg);
+  color: var(--hover-nav-button-text);
+}
+.icon-muted { color: var(--icon-nav-muted); }
+
+.btn-action-feature {
+  background-color: var(--bg-action-feature-soft);
+  border: 1px solid var(--border-action-feature);
+  color: var(--text-action-feature);
 }
 
-/* Emulate Tailwind group behaviors natively for custom css fallback */
-.group:hover .rounded-full {
-  background-color: var(--handle-hover) !important;
+.badge-telemetry {
+  background-color: var(--bg-telemetry-badge);
+  border: 1px solid var(--border-telemetry-badge);
+}
+.text-telemetry { color: var(--text-telemetry-status); }
+.bg-telemetry-dot { background-color: var(--bg-telemetry-pulse-dot); }
+
+/* --- RESIZABLE MATRIX STORAGE WRAPPERS --- */
+.panel-container-compare {
+  border: 1px solid var(--border-panel-edge);
+  background-color: var(--bg-panel-surface);
+  padding: 0 !important; /* Managed cleanly via interior margins to stop edge bleeding */
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
 }
 
-.group:active .rounded-full {
-  background-color: var(--handle-active) !important;
+/* --- FIXED OPAQUE STICKY HEADER PANEL --- */
+.sticky-panel-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-panel-surface);
+  padding: 0.85rem 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Beautifully centers your text headers */
+  border-bottom: 1px solid var(--border-header-edge);
+  width: 100%;
 }
 
-/* Custom Additions safely bound to input selectors */
-.focus-border-brand-color:focus { border-color: var(--focus-brand-border) !important; }
-.bg-confirm-btn { background-color: var(--bg-confirm); }
-.bg-backdrop-mask { background-color: var(--bg-backdrop-mask); }
-.text-error { color: var(--text-error); }
+/* Dynamic Themed Pill Indicators */
+.session-pill-indicator {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(96, 165, 250, 0.04) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-modal-titles);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
 
-/* --- SHARED CONSTANTS --- */
-.status-inactive { background-color: rgba(153, 27, 27, 0.3); color: #f87171; }
-.status-active   { background-color: rgba(30, 58, 138, 0.3); color: #60a5fa; }
-.status-branch   { background-color: rgba(21, 128, 61, 0.3); color: #4ade80; }
+[data-theme='light'] .session-pill-indicator {
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+  border: 1px solid rgba(29, 78, 216, 0.25);
+  color: var(--text-modal-titles);
+}
 
-/* --- SHARED SCROLLBAR ENGINE --- */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: inherit; }
-.custom-scrollbar::-webkit-scrollbar-thumb { border-radius: 10px; background: inherit; }
+/* Internal Layout Scroll Workspace Padding Fix */
+.compare-scroll-workspace {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* Generous gap between vertically stacked components */
+  padding: 1.25rem; /* Forces balanced gaps away from all left, right, and bottom borders */
+}
 
+/* Splitter Bar Handle Styles */
+.splitter-handle-bar {
+  background-color: var(--handle-splitter-bg) !important;
+}
+.group:hover .splitter-handle-bar {
+  background-color: var(--handle-splitter-hover) !important;
+}
+.group:active .splitter-handle-bar {
+  background-color: var(--handle-splitter-active) !important;
+}
+
+/* Modals & Inputs formatting specifications */
+.modal-overlay-bg { background-color: var(--bg-modal-backdrop-mask); backdrop-filter: blur(4px); }
+.modal-frame-surface {
+  background-color: var(--bg-panel-surface);
+  border: 1px solid var(--border-modal-edge);
+}
+.text-modal-header { color: var(--text-modal-titles); }
+.text-modal-body-desc { color: var(--text-modal-body); }
+.label-form-input { color: var(--text-input-labels); }
+
+.input-form-control, .select-form-control {
+  background-color: var(--bg-form-input);
+  border: 1px solid var(--border-form-input);
+  color: var(--text-form-input);
+}
+.input-form-control:focus, .select-form-control:focus {
+  border-color: var(--focus-form-input-border) !important;
+}
+
+.btn-modal-confirm { background-color: var(--bg-modal-confirm-button); color: var(--text-modal-confirm-button); }
+.btn-modal-confirm:hover { background-color: var(--hover-modal-confirm-button); }
+.text-error-feedback { color: var(--text-system-error); }
+
+/* --- CUSTOM SCROLLBAR ENGINE --- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--handle-splitter-hover);
+}
+
+/* Animations */
 .telemetry-pulse {
   animation: pulse-ring 2s ease-in-out infinite;
   overflow: visible !important; 
 }
-
 @keyframes pulse-ring {
-  0% { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
-  50% { 
-    opacity: 0.3; 
-    transform: scale(1.8); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.8); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-/* --- ICON THEME CLASSES --- */
-.icon-sun {
-  transition: all 0.5s ease;
-}
-
-/* Light theme vibrancy */
-[data-theme='light'] .icon-sun {
-  color: #fb923c;
-}
-
-[data-theme='light'] .icon-sun:hover {
-  color: #fbbf24;
-  transform: rotate(135deg);
-}
+.icon-sun { transition: all 0.5s ease; }
+[data-theme='light'] .icon-sun { color: #fb923c; }
+[data-theme='light'] .icon-sun:hover { color: #fbbf24; transform: rotate(135deg); }

@@ -1,5 +1,3 @@
-/* frontend/src/components/ChatPanel.jsx */
-
 import React, { useState } from 'react';
 import '../styles/ChatPanel.css'; 
 
@@ -14,7 +12,8 @@ const ChatPanel = ({
   const [sessionTargetForDeletion, setSessionTargetForDeletion] = useState(null);
 
   const handleSelectSession = (session) => {
-    window.location.href = `/${encodeURIComponent(session.name)}`;
+    const target = typeof session === 'string' ? session : session.name;
+    window.location.href = `/${encodeURIComponent(target)}`;
     onClose();
   };
 
@@ -82,25 +81,27 @@ const ChatPanel = ({
           <button
             type="button"
             onClick={handleNewChat}
-            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold uppercase tracking-wide cursor-pointer pointer-events-auto transition-colors"
+            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold uppercase tracking-wide cursor-pointer pointer-events-auto transition-colors border-0"
           >
             + Start New Chat
           </button>
         </div>
         
-        <div className="px-4 pt-3 pb-1">
+        <div className="px-4 pt-3 pb-1 flex-shrink-0">
           <p className="text-[10px] font-bold uppercase tracking-widest cp-section-tag">Saved History</p>
         </div>
         
-        <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-2.5 scrollbar-thin pointer-events-auto">
+        {/* ENHANCED WORKSPACE AREA WITH CUSTOM SCROLLER STREAM */}
+        <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-2.5 pointer-events-auto cp-scroller-engine">
           {sessions.map((s, index) => {
             const targetName = typeof s === 'string' ? s : s.name;
             const displayTime = s.mtime_display || "History Log";
             const isActive = currentSessionName === targetName;
+            const uniqueKey = targetName ? `session-${targetName}` : `fallback-index-${index}`;
 
             return (
               <div
-                key={targetName || index}
+                key={uniqueKey}
                 className={`group relative flex items-center justify-between p-3 rounded-xl border cp-history-card ${
                   isActive ? 'active' : 'idle'
                 }`}
@@ -150,7 +151,7 @@ const ChatPanel = ({
               <div className="w-full border rounded-xl p-3 flex items-center gap-2.5 cp-modal-target-box">
                 <span className="text-xs text-red-400 select-none">📁</span>
                 <span className="text-xs font-mono font-bold text-blue-500 dark:text-blue-400 tracking-wide truncate" title={sessionTargetForDeletion}>
-                  {sessionTargetForDeletion}.jsonl
+                  {sessionTargetForDeletion}
                 </span>
               </div>
             </div>
