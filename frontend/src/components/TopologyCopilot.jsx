@@ -11,7 +11,7 @@ export default function TopologyCopilot({
   setSessionName, 
   initialData, 
   currentTheme = "dark",
-  onBranchClick // Structural layout callback wired natively from App.jsx
+  onBranchClick 
 }) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
@@ -23,8 +23,8 @@ export default function TopologyCopilot({
         setMessages(initialData.history);
       } else {
         setMessages([{ 
-          sender: 'system', 
-          content: initialData.reply, 
+          sender: initialData.sender || initialData.role || 'system', 
+          content: initialData.content || initialData.reply, 
           timestamp: initialData.timestamp 
         }]);
       }
@@ -46,7 +46,12 @@ export default function TopologyCopilot({
     setInputValue(''); 
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+      // Maps to your session specific endpoint matching your App.jsx routing logic
+      const targetUrl = sessionName 
+        ? `http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionName)}/message`
+        : "http://127.0.0.1:8000/api/message";
+
+      const response = await fetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -62,8 +67,16 @@ export default function TopologyCopilot({
       } else {
         setMessages((prev) => [
           ...prev, 
-          { sender: 'user', content: userContent, timestamp: data.user_time },
-          { sender: 'system', content: data.reply, timestamp: data.system_time }
+          { 
+            sender: 'user', 
+            content: userContent, 
+            timestamp: data.user_time || new Date().toLocaleTimeString() 
+          },
+          { 
+            sender: 'system', 
+            content: data.reply || data.content, 
+            timestamp: data.system_time || data.timestamp || new Date().toLocaleTimeString() 
+          }
         ]);
       }
       
@@ -76,16 +89,16 @@ export default function TopologyCopilot({
   };
 
   return (
-    <div data-theme={currentTheme} className="bg-[var(--bg-outer)] rounded-xl p-4 border border-[var(--border-outer)] shadow-xl flex flex-col h-full w-full overflow-hidden">
+    <div data-theme={currentTheme} className="bg-[var(--copilot-bg-outer)] rounded-xl p-4 border border-[var(--copilot-border-outer)] shadow-xl flex flex-col h-full w-full overflow-hidden">
       
       {/* Header telemetry metadata metrics row */}
-      <div className="flex items-center justify-between gap-2 mb-4 w-full flex-shrink-0 border-b border-[var(--border-inner)] pb-3">
+      <div className="flex items-center justify-between gap-2 mb-4 w-full flex-shrink-0 border-b border-[var(--copilot-border-inner)] pb-3">
         
         {/* Left Group: Topology Copilot title and Session badge */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-orange-600 text-xs md:text-sm flex-shrink-0">🤖</span>
-            <h2 className="text-xs md:text-sm font-black tracking-[0.1em] text-[var(--text-header)] uppercase font-sans">
+            <h2 className="text-xs md:text-sm font-black tracking-[0.1em] text-[var(--copilot-text-header)] uppercase font-sans">
               Topology Copilot
             </h2>
           </div>
@@ -93,8 +106,8 @@ export default function TopologyCopilot({
           {/* Session Status Badge */}
           <span className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded-full border whitespace-nowrap ${
             status === "Not Started" 
-              ? "bg-[var(--bg-status-inactive)] text-[var(--text-status-inactive)] border-red-800/50" 
-              : "bg-[var(--bg-status-active)] text-[var(--text-status-active)] border-blue-800/50"
+              ? "bg-[var(--copilot-bg-status-inactive)] text-[var(--copilot-text-status-inactive)] border-red-800/50" 
+              : "bg-[var(--copilot-bg-status-active)] text-[var(--copilot-text-status-active)] border-blue-800/50"
           }`}>
             <Zap className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" />
             <span>
@@ -109,7 +122,7 @@ export default function TopologyCopilot({
             type="button"
             disabled={status === "Not Started"}
             onClick={onBranchClick}
-            className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-[var(--bg-branch)] text-[var(--text-branch)] font-mono px-2.5 py-1 rounded-full border border-blue-800/50 whitespace-nowrap transition-all select-none ${
+            className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-[var(--copilot-bg-branch)] text-[var(--copilot-text-branch)] font-mono px-2.5 py-1 rounded-full border border-blue-800/50 whitespace-nowrap transition-all select-none ${
               status === "Not Started"
                 ? "opacity-40 cursor-not-allowed border-slate-800"
                 : "cursor-pointer hover:bg-blue-950/40 active:scale-95"
@@ -124,34 +137,41 @@ export default function TopologyCopilot({
       </div>
 
       {/* Localized contained scroll view container frame */}
-      <div className="flex-grow h-0 min-h-0 bg-[var(--bg-inner)] p-4 rounded-lg font-mono text-xs md:text-sm border border-[var(--border-inner)] overflow-y-auto space-y-4 custom-scrollbar">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}>
-            {m.sender === 'user' ? (
-              <div className="text-right w-full flex justify-end">
-                <div className="bg-[var(--bg-user-bubble)] px-4 py-3 rounded-xl rounded-tr-none border border-[var(--border-user-bubble)] font-mono shadow-md text-left max-w-[60%]">
-                  <span className="text-[10px] md:text-xs text-[var(--text-user-timestamp)] font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-90">
-                    USER • {m.timestamp}
-                  </span>
-                  <div className="text-[var(--text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
-                    {m.content}
+      <div className="flex-grow h-0 min-h-0 bg-[var(--copilot-bg-inner)] p-4 rounded-lg font-mono text-xs md:text-sm border border-[var(--copilot-border-inner)] overflow-y-auto space-y-4 custom-scrollbar">
+        {messages.map((m, i) => {
+          // Normalize sender check to safely parse both 'user' vs 'sender' formats
+          const isUser = m.sender === 'user' || m.role === 'user';
+          const msgContent = m.content || m.text;
+          const msgTime = m.timestamp;
+
+          return (
+            <div key={i} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+              {isUser ? (
+                <div className="text-right w-full flex justify-end">
+                  <div className="bg-[var(--copilot-bg-user-bubble)] px-4 py-3 rounded-xl rounded-tr-none border border-[var(--copilot-border-user-bubble)] font-mono shadow-md text-left max-w-[60%]">
+                    <span className="text-[10px] md:text-xs text-[var(--copilot-text-user-timestamp)] font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-90">
+                      USER • {msgTime}
+                    </span>
+                    <div className="text-[var(--copilot-text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
+                      {msgContent}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-left w-full">
-                <div className="bg-[var(--bg-system-bubble)] px-4 py-3 rounded-xl rounded-tl-none border border-[var(--border-system-bubble)] shadow-md w-fit max-w-[75%]">
-                  <span className="text-[10px] md:text-xs text-[var(--text-system-timestamp)] font-mono font-bold tracking-wider uppercase block mb-1.5">
-                    SYSTEM • {m.timestamp}
-                  </span>
-                  <div className="text-[var(--text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
-                    {m.content}
+              ) : (
+                <div className="text-left w-full">
+                  <div className="bg-[var(--copilot-bg-system-bubble)] px-4 py-3 rounded-xl rounded-tl-none border border-[var(--copilot-border-system-bubble)] shadow-md w-fit max-w-[75%]">
+                    <span className="text-[10px] md:text-xs text-[var(--copilot-text-system-timestamp)] font-mono font-bold tracking-wider uppercase block mb-1.5">
+                      SYSTEM • {msgTime}
+                    </span>
+                    <div className="text-[var(--copilot-text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
+                      {msgContent}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
@@ -169,12 +189,12 @@ export default function TopologyCopilot({
               key={cmd.text}
               onClick={() => handlePillClick(cmd.text)}
               style={{
-                backgroundColor: `var(--bg-pill-${cmd.type})`,
-                borderColor: `var(--border-pill-${cmd.type})`,
-                color: `var(--text-pill-${cmd.type})`
+                backgroundColor: `var(--copilot-bg-pill-${cmd.type})`,
+                borderColor: `var(--copilot-border-pill-${cmd.type})`,
+                color: `var(--copilot-text-pill-${cmd.type})`
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `var(--hover-pill-${cmd.type})`}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `var(--bg-pill-${cmd.type})`}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `var(--copilot-hover-pill-${cmd.type})`}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `var(--copilot-bg-pill-${cmd.type})`}
               className="text-[11px] font-bold uppercase tracking-wide font-sans px-4 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm transform active:scale-95"
             >
               {cmd.text}
@@ -186,15 +206,15 @@ export default function TopologyCopilot({
             type="button"
             onClick={() => handlePillClick('Display Smiley Face')}
             style={{
-              backgroundColor: 'var(--bg-pill-smiley)',
-              borderColor: 'var(--border-pill-smiley)',
-              color: 'var(--text-pill-smiley)'
+              backgroundColor: 'var(--copilot-bg-pill-smiley)',
+              borderColor: 'var(--copilot-border-pill-smiley)',
+              color: 'var(--copilot-text-pill-smiley)'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-pill-smiley)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-pill-smiley)'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--copilot-hover-pill-smiley)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--copilot-bg-pill-smiley)'}
             className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide font-sans px-4 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm transform active:scale-95"
           >
-            <Smile className="w-3.5 h-3.5" style={{ color: 'var(--text-pill-smiley)' }} />
+            <Smile className="w-3.5 h-3.5" style={{ color: 'var(--copilot-text-pill-smiley)' }} />
             Smiley Face
           </button>
         </div>
@@ -208,12 +228,12 @@ export default function TopologyCopilot({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} 
           placeholder="isolate [34] or reset |..."
-          className="flex-grow bg-[var(--bg-input)] border border-[var(--border-inner)] rounded-lg py-2.5 px-3 text-xs md:text-sm font-mono text-[var(--text-input)] placeholder-[var(--placeholder-input)] focus:outline-none focus:border-[var(--text-muted)]"
+          className="flex-grow bg-[var(--copilot-bg-input)] border border-[var(--copilot-border-inner)] rounded-lg py-2.5 px-3 text-xs md:text-sm font-mono text-[var(--copilot-text-input)] placeholder-[var(--copilot-placeholder-input)] focus:outline-none focus:border-[var(--copilot-text-muted)]"
         />
         <button 
           type="button"
           onClick={handleSendMessage} 
-          className="bg-[var(--bg-action)] hover:border-[var(--border-subtle)] p-2.5 rounded-lg border border-[var(--border-action)] text-[var(--text-status-active)] transition-all active:scale-95 cursor-pointer flex items-center justify-center"
+          className="bg-[var(--copilot-bg-action)] hover:border-[var(--copilot-border-subtle)] p-2.5 rounded-lg border border-[var(--copilot-border-action)] text-[var(--copilot-text-status-active)] transition-all active:scale-95 cursor-pointer flex items-center justify-center"
         >
           <Send className="w-4 h-4 md:w-4.5 md:h-4.5" />
         </button>

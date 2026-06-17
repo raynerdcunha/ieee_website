@@ -1,7 +1,10 @@
 /* src/styles/ChatPanel.css */
 
-/* 1. STRUCTURAL VARIABLE DESIGN TOKENS */
-[data-theme='dark'] {
+/* 1. ARCHITECTURAL ISOLATION RULES (DARK THEME) */
+[data-theme='dark'] .cp-drawer,
+[data-theme='dark'] .cp-modal-panel,
+[data-theme='dark'].cp-drawer,
+[data-theme='dark'].cp-modal-panel {
   --cp-bg-drawer: #0d1527;
   --cp-bg-card-active: rgba(30, 58, 138, 0.4);
   --cp-border-card-active: rgba(29, 78, 216, 0.5);
@@ -14,7 +17,11 @@
   --cp-bg-input-box: rgba(2, 6, 23, 0.6);
 }
 
-[data-theme='light'] {
+/* 1. ARCHITECTURAL ISOLATION RULES (LIGHT THEME) */
+[data-theme='light'] .cp-drawer,
+[data-theme='light'] .cp-modal-panel,
+[data-theme='light'].cp-drawer,
+[data-theme='light'].cp-modal-panel {
   --cp-bg-drawer: #f8fafc;
   --cp-bg-card-active: #e0e7ff;
   --cp-border-card-active: #c7d2fe;
@@ -55,6 +62,10 @@
 
 .cp-section-tag {
   color: var(--cp-text-muted);
+}
+
+.cp-empty-backlog-box {
+  border-color: var(--cp-border-split);
 }
 
 /* 3. INTERACTIVE HISTORY CARD ELEMENTS */
@@ -101,6 +112,10 @@
   background-color: var(--cp-bg-drawer);
   border-color: var(--cp-border-split);
   color: var(--cp-text-main);
+}
+
+.cp-modal-desc {
+  color: var(--cp-text-muted);
 }
 
 .cp-modal-target-box {

@@ -1,137 +1,143 @@
 /* src/styles/TopologyCopilot.css */
 
-/* 1. SHARED CONSTANTS (BACKGROUND TINTS ONLY) */
-:root {
-  /* Status Badges Backgrounds */
-  --bg-status-inactive: rgba(153, 27, 27, 0.15); /* Soft red tint */
-  --bg-status-active: rgba(30, 58, 138, 0.15);   /* Soft blue tint */
-  
-  /* Branch Badge Background */
-  --bg-branch: rgba(21, 128, 61, 0.15);          /* Soft green tint */
-}
+/* 1. INITIALIZE UNIQUE DEFAULTS ON THE GLOBAL DOCUMENT TREE (LIGHT THEME) */
+:root, [data-theme='light'] {
+  /* Constant Background Tints */
+  --copilot-bg-status-inactive: rgba(153, 27, 27, 0.15);
+  --copilot-bg-status-active: rgba(30, 58, 138, 0.15);
+  --copilot-bg-branch: rgba(21, 128, 61, 0.15);
 
-/* 2. DARK THEME */
-[data-theme='dark'] {
-  /* High-Contrast Badges */
-  --text-status-inactive: #f87171;              /* Glowing red */
-  --text-status-active: #60a5fa;                /* Glowing blue */
-  --text-branch: #4ade80;                       /* Glowing green */
-
-  /* Chat Message Timestamps */
-  --text-user-timestamp: #93c5fd;               /* Soft sky blue */
-  --text-system-timestamp: #94a3b8;             /* Muted gray-blue */
-
-  /* Structural Shell */
-  --bg-outer: #0b1329;
-  --border-outer: rgba(30, 58, 138, 0.4);
-  --text-header: #e2e8f0;
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --bg-inner: #111a2e;
-  --border-inner: #1e293b;
-  --bg-user-bubble: rgba(30, 58, 138, 0.2);
-  --border-user-bubble: rgba(59, 130, 246, 0.3);
-  --bg-system-bubble: rgba(15, 23, 42, 0.4);
-  --border-system-bubble: rgba(30, 41, 59, 0.6);
-
-  /* Macro Action Pills */
-  --bg-pill-isolate: #1e293b;
-  --text-pill-isolate: #f1f5f9;
-  --border-pill-isolate: #334155;
-  --hover-pill-isolate: #334155;
-
-  --bg-pill-reset-n: #1e293b;
-  --text-pill-reset-n: #f1f5f9;
-  --border-pill-reset-n: #334155;
-  --hover-pill-reset-n: #334155;
-
-  --bg-pill-reset-p: #1e293b;
-  --text-pill-reset-p: #f1f5f9;
-  --border-pill-reset-p: #334155;
-  --hover-pill-reset-p: #334155;
-
-  --bg-pill-smiley: #1e293b;
-  --text-pill-smiley: #ca8a04;   /* Saturated Gold font color */
-  --border-pill-smiley: #ca8a04; /* Saturated Gold border */
-  --hover-pill-smiley: #334155;
-
-  --bg-pill-p-factor: #1e293b;
-  --text-pill-p-factor: #f1f5f9;
-  --border-pill-p-factor: #334155;
-  --hover-pill-p-factor: #334155;
-
-  /* Input Field */
-  --bg-input: #020617;
-  --text-input: #34d399;
-  --placeholder-input: #475569;
-}
-
-/* 3. LIGHT THEME */
-[data-theme='light'] {
   /* High-Contrast Deep Tones for Badges */
-  --text-status-inactive: #991b1b;              /* Deep red-800 text */
-  --text-status-active: #1e3a8a;                /* Deep navy-900 text */
-  --text-branch: #166534;                       /* Deep forest-800 text */
+  --copilot-text-status-inactive: #991b1b;
+  --copilot-text-status-active: #1e3a8a;
+  --copilot-text-branch: #166534;
 
   /* Chat Message Timestamps */
-  --text-user-timestamp: #2563eb;               /* Sharp, vivid blue (readable on light blue) */
-  --text-system-timestamp: #475569;             /* Clear dark slate (readable on light gray) */
+  --copilot-text-user-timestamp: #2563eb;
+  --copilot-text-system-timestamp: #475569;
 
   /* Structural Shell */
-  --bg-outer: #f8fafc;
-  --border-outer: #e2e8f0;
-  --text-header: #1e293b;
-  --text-main: #334155;
-  --text-muted: #64748b;
-  --bg-inner: #f1f5f9;
-  --border-inner: #cbd5e1;
+  --copilot-bg-outer: #f8fafc;
+  --copilot-border-outer: #e2e8f0;
+  --copilot-text-header: #1e293b;
+  --copilot-text-main: #334155;
+  --copilot-text-muted: #64748b;
+  --copilot-bg-inner: #f1f5f9;
+  --copilot-border-inner: #cbd5e1;
 
   /* Bubbles */
-  --bg-user-bubble: #e0e7ff; 
-  --border-user-bubble: #c7d2fe;
-  --bg-system-bubble: #e2e8f0; 
-  --border-system-bubble: #cbd5e1;
+  --copilot-bg-user-bubble: #e0e7ff; 
+  --copilot-border-user-bubble: #c7d2fe;
+  --copilot-bg-system-bubble: #e2e8f0; 
+  --copilot-border-system-bubble: #cbd5e1;
 
   /* Macro Action Pills */
-  --bg-pill-isolate: #e2e8f0;
-  --text-pill-isolate: #475569;    
-  --border-pill-isolate: #475569;
-  --hover-pill-isolate: #cbd5e1;
+  --copilot-bg-pill-isolate: #e2e8f0;
+  --copilot-text-pill-isolate: #475569;    
+  --copilot-border-pill-isolate: #475569;
+  --copilot-hover-pill-isolate: #cbd5e1;
 
-  --bg-pill-reset-n: #e2e8f0;
-  --text-pill-reset-n: #475569;    
-  --border-pill-reset-n: #475569;
-  --hover-pill-reset-n: #cbd5e1;
+  --copilot-bg-pill-reset-n: #e2e8f0;
+  --copilot-text-pill-reset-n: #475569;    
+  --copilot-border-pill-reset-n: #475569;
+  --copilot-hover-pill-reset-n: #cbd5e1;
 
-  --bg-pill-reset-p: #e2e8f0;
-  --text-pill-reset-p: #475569;    
-  --border-pill-reset-p: #475569;
-  --hover-pill-reset-p: #cbd5e1;
+  --copilot-bg-pill-reset-p: #e2e8f0;
+  --copilot-text-pill-reset-p: #475569;    
+  --copilot-border-pill-reset-p: #475569;
+  --copilot-hover-pill-reset-p: #cbd5e1;
 
-  --bg-pill-smiley: #f0f2fe;     /* Soft, tinted indigo background */
-  --text-pill-smiley: #4f46e5;   /* Deep, crisp indigo text */
-  --border-pill-smiley: #818cf8; /* Vibrant indigo accent border */
-  --hover-pill-smiley: #e0e4fe;
+  --copilot-bg-pill-smiley: #f0f2fe;
+  --copilot-text-pill-smiley: #4f46e5;
+  --copilot-border-pill-smiley: #818cf8;
+  --copilot-hover-pill-smiley: #e0e4fe;
 
-  --bg-pill-p-factor: #e2e8f0;
-  --text-pill-p-factor: #475569;    
-  --border-pill-p-factor: #475569;
-  --hover-pill-p-factor: #cbd5e1;
+  --copilot-bg-pill-p-factor: #e2e8f0;
+  --copilot-text-pill-p-factor: #475569;    
+  --copilot-border-pill-p-factor: #475569;
+  --copilot-hover-pill-p-factor: #cbd5e1;
 
-  /* Input Field */
-  --bg-input: #ffffff;
-  --text-input: #059669; 
-  --placeholder-input: #94a3b8;
+  /* Input Field & Submission Actions */
+  --copilot-bg-input: #ffffff;
+  --copilot-text-input: #059669; 
+  --copilot-placeholder-input: #94a3b8;
+  --copilot-bg-action: #e2e8f0;
+  --copilot-border-action: #cbd5e1;
+  --copilot-border-subtle: #94a3b8;
 }
 
-/* 4. SHARED SCROLLBAR STYLES */
+/* 2. OVERRIDE TRACE FOR DARK ENGINE MODE (UPSTREAM LINKED) */
+[data-theme='dark'], .dark {
+  /* Constant Background Tints */
+  --copilot-bg-status-inactive: rgba(153, 27, 27, 0.15);
+  --copilot-bg-status-active: rgba(30, 58, 138, 0.15);
+  --copilot-bg-branch: rgba(21, 128, 61, 0.15);
+
+  /* High-Contrast Badges */
+  --copilot-text-status-inactive: #f87171;
+  --copilot-text-status-active: #60a5fa;
+  --copilot-text-branch: #4ade80;
+
+  /* Chat Message Timestamps */
+  --copilot-text-user-timestamp: #93c5fd;
+  --copilot-text-system-timestamp: #94a3b8;
+
+  /* Structural Shell */
+  --copilot-bg-outer: #0b1329;
+  --copilot-border-outer: rgba(30, 58, 138, 0.4);
+  --copilot-text-header: #e2e8f0;
+  --copilot-text-main: #f1f5f9;
+  --copilot-text-muted: #94a3b8;
+  --copilot-bg-inner: #111a2e;
+  --copilot-border-inner: #1e293b;
+  --copilot-bg-user-bubble: rgba(30, 58, 138, 0.2);
+  --copilot-border-user-bubble: rgba(59, 130, 246, 0.3);
+  --copilot-bg-system-bubble: rgba(15, 23, 42, 0.4);
+  --copilot-border-system-bubble: rgba(30, 41, 59, 0.6);
+
+  /* Macro Action Pills */
+  --copilot-bg-pill-isolate: #1e293b;
+  --copilot-text-pill-isolate: #f1f5f9;
+  --copilot-border-pill-isolate: #334155;
+  --copilot-hover-pill-isolate: #334155;
+
+  --copilot-bg-pill-reset-n: #1e293b;
+  --copilot-text-pill-reset-n: #f1f5f9;
+  --copilot-border-pill-reset-n: #334155;
+  --copilot-hover-pill-reset-n: #334155;
+
+  --copilot-bg-pill-reset-p: #1e293b;
+  --copilot-text-pill-reset-p: #f1f5f9;
+  --copilot-border-pill-reset-p: #334155;
+  --copilot-hover-pill-reset-p: #334155;
+
+  --copilot-bg-pill-smiley: #1e293b;
+  --copilot-text-pill-smiley: #ca8a04;
+  --copilot-border-pill-smiley: #ca8a04;
+  --copilot-hover-pill-smiley: #334155;
+
+  --copilot-bg-pill-p-factor: #1e293b;
+  --copilot-text-pill-p-factor: #f1f5f9;
+  --copilot-border-pill-p-factor: #334155;
+  --copilot-hover-pill-p-factor: #334155;
+
+  /* Input Field & Submission Actions */
+  --copilot-bg-input: #020617;
+  --copilot-text-input: #34d399;
+  --copilot-placeholder-input: #475569;
+  --copilot-bg-action: #1e293b;
+  --copilot-border-action: #334155;
+  --copilot-border-subtle: #475569;
+}
+
+/* --- SHARED SCROLLBAR STYLES --- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--bg-inner);
+  background: var(--copilot-bg-inner);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border-inner);
+  background: var(--copilot-border-inner);
   border-radius: 10px;
 }

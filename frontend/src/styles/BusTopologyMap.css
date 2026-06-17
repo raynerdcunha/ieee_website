@@ -1,0 +1,21 @@
+/* src/styles/BusTopologyMap.css */
+
+/* --- LIGHT THEME TOKENS --- */
+[data-theme='light'] {
+  --bus-bg-outer: #ffffff;      /* white */
+  --bus-bg-inner: #f8fafc;      /* slate-50 */
+  --bus-border-outer: #e2e8f0;  /* slate-200 */
+  --bus-border-inner: #cbd5e1;  /* slate-300 */
+  --bus-text-header: #0f172a;   /* slate-900 */
+  --bus-text-muted: #64748b;    /* slate-500 */
+}
+
+/* --- DARK THEME TOKENS --- */
+[data-theme='dark'] {
+  --bus-bg-outer: #0f172a;      /* slate-900 */
+  --bus-bg-inner: #020617;      /* slate-950 */
+  --bus-border-outer: #1e293b;  /* slate-800 */
+  --bus-border-inner: #334155;  /* slate-700 */
+  --bus-text-header: #f8fafc;   /* slate-50 */
+  --bus-text-muted: #64748b;    /* slate-500 */
+}

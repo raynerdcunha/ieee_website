@@ -38,8 +38,6 @@ const ChatPanel = ({
       });
       
       if (response.ok) {
-        // Logic: If we are deleting the session currently active, redirect to root.
-        // Otherwise, just refresh the list and keep the drawer open.
         if (sessionTargetForDeletion === currentSessionName) {
           window.location.href = '/';
         } else if (onDeleteSuccess) {
@@ -128,7 +126,7 @@ const ChatPanel = ({
           })}
 
           {sessions.length === 0 && (
-            <div className="text-center py-8 border border-dashed rounded-xl cp-empty-backlog-box" style={{ borderColor: 'var(--border-inner)' }}>
+            <div className="text-center py-8 border border-dashed rounded-xl cp-empty-backlog-box">
               <div className="text-[10px] font-bold uppercase tracking-wider cp-section-tag">No Backlogs Logged</div>
             </div>
           )}
@@ -145,7 +143,7 @@ const ChatPanel = ({
             </h3>
             
             <div className="flex flex-col gap-3">
-              <p className="text-[11px] font-sans leading-relaxed text-slate-300 dark:text-slate-400">
+              <p className="text-[11px] font-sans leading-relaxed cp-modal-desc">
                 Are you sure you want to delete this specific trace? This action will securely wipe all configuration backups from storage.
               </p>
               

@@ -297,7 +297,7 @@ function App() {
       {/* 2. LOWER WORKING AREA */}
       <main 
         ref={containerRef}
-        className="w-full flex-1 flex items-center p-4 relative overflow-hidden gap-2"
+        className="w-full flex-1 flex items-end p-4 relative overflow-hidden gap-2"
       >
         
         {/* Left Layout Pane: Bus Topology Map */}
@@ -310,11 +310,11 @@ function App() {
           onMouseDown={(e) => startResizeDrag(0, e)}
           className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center" 
         >
-          {/* Visible physical grab pill shape bar using solid standard Tailwind grays & blues */}
-          <div className="w-1.5 h-14 rounded-full bg-gray-400/40 dark:bg-gray-700/60 group-hover:bg-blue-500/80 group-active:bg-blue-500 transition-all flex flex-col gap-0.5 justify-center items-center shadow-sm">
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+          {/* Visible physical grab pill shape bar inside the gap zone */}
+          <div className="w-1.5 h-12 rounded-full bg-subtle/50 group-hover:bg-brand/60 group-active:bg-brand transition-all flex flex-col gap-0.5 justify-center items-center">
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
           </div>
         </div>
 
@@ -328,11 +328,11 @@ function App() {
           onMouseDown={(e) => startResizeDrag(1, e)}
           className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center" 
         >
-          {/* Visible physical grab pill shape bar using solid standard Tailwind grays & blues */}
-          <div className="w-1.5 h-14 rounded-full bg-gray-400/40 dark:bg-gray-700/60 group-hover:bg-blue-500/80 group-active:bg-blue-500 transition-all flex flex-col gap-0.5 justify-center items-center shadow-sm">
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
-            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+          {/* Visible physical grab pill shape bar inside the gap zone */}
+          <div className="w-1.5 h-12 rounded-full bg-subtle/50 group-hover:bg-brand/60 group-active:bg-brand transition-all flex flex-col gap-0.5 justify-center items-center">
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
+            <span className="w-0.5 h-0.5 rounded-full bg-canvas" />
           </div>
         </div>
 

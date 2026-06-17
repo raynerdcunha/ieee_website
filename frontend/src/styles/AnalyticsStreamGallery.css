@@ -1,0 +1,21 @@
+/* src/styles/AnalyticsStreamGallery.css */
+
+/* --- LIGHT THEME TOKENS --- */
+[data-theme='light'] {
+  --analytics-bg-outer: #ffffff;      /* white */
+  --analytics-bg-inner: #f8fafc;      /* slate-50 */
+  --analytics-border-outer: #e2e8f0;  /* slate-200 */
+  --analytics-border-inner: #cbd5e1;  /* slate-300 */
+  --analytics-text-header: #0f172a;   /* slate-900 */
+  --analytics-text-muted: #64748b;    /* slate-500 */
+}
+
+/* --- DARK THEME TOKENS --- */
+[data-theme='dark'] {
+  --analytics-bg-outer: #0f172a;      /* slate-900 */
+  --analytics-bg-inner: #020617;      /* slate-950 */
+  --analytics-border-outer: #1e293b;  /* slate-800 */
+  --analytics-border-inner: #334155;  /* slate-700 */
+  --analytics-text-header: #f8fafc;   /* slate-50 */
+  --analytics-text-muted: #64748b;    /* slate-500 */
+}
