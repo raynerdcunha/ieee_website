@@ -2,7 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Zap, GitFork, Send, Smile } from 'lucide-react';
 import '../styles/TopologyCopilot.css'; 
 
-export default function TopologyCopilot({ status, setStatus, sessionName, setSessionName, initialData, currentTheme = "dark" }) {
+export default function TopologyCopilot({ 
+  status, 
+  setStatus, 
+  sessionName, 
+  setSessionName, 
+  initialData, 
+  currentTheme = "dark",
+  onBranchClick // Accepting the structural modal callback prop wired from App.jsx
+}) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -66,22 +74,21 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
   };
 
   return (
-    /* ADJUSTED: Reads theme dynamically using currentTheme prop */
     <div data-theme={currentTheme} className="bg-[var(--bg-outer)] rounded-xl p-4 border border-[var(--border-outer)] shadow-xl flex flex-col h-full w-full overflow-hidden">
       
       {/* Header telemetry metadata metrics row */}
       <div className="flex items-center justify-between gap-2 mb-4 w-full flex-shrink-0 border-b border-[var(--border-inner)] pb-3">
         
-        {/* Left Group: Topology Copilot title and Session badge grouped together */}
+        {/* Left Group: Topology Copilot title and Session badge */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-orange-600 text-xs md:text-sm flex-shrink-0">🤖</span>
-            <h2 className="text-xs md:text-sm font-bold tracking-wider text-[var(--text-header)] uppercase">
+            <h2 className="text-xs md:text-sm font-black tracking-[0.1em] text-[var(--text-header)] uppercase font-sans">
               Topology Copilot
             </h2>
           </div>
 
-          {/* Session Status Badge (Now resting directly next to the title) */}
+          {/* Session Status Badge */}
           <span className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded-full border whitespace-nowrap ${
             status === "Not Started" 
               ? "bg-[var(--bg-status-inactive)] text-[var(--text-status-inactive)] border-red-800/50" 
@@ -94,12 +101,22 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
           </span>
         </div>
 
-        {/* Right Group: Branch Chat badge completely isolated on the far right edge */}
+        {/* Right Group: Reconfigured Interactive Branch Chat Button Badge */}
         <div className="flex-shrink-0">
-          <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-[var(--bg-branch)] text-[var(--text-branch)] font-mono px-2.5 py-1 rounded-full border border-blue-800/50 whitespace-nowrap">
+          <button
+            type="button"
+            disabled={status === "Not Started"}
+            onClick={onBranchClick}
+            className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-[var(--bg-branch)] text-[var(--text-branch)] font-mono px-2.5 py-1 rounded-full border border-blue-800/50 whitespace-nowrap transition-all select-none ${
+              status === "Not Started"
+                ? "opacity-40 cursor-not-allowed border-slate-800"
+                : "cursor-pointer hover:bg-blue-950/40 active:scale-95"
+            }`}
+            title={status === "Not Started" ? "Initialize a valid session stream to unlock parallel branching options" : "Fork parallel history trace"}
+          >
             <GitFork className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" />
             <span className="inline">Branch Chat</span>
-          </span>
+          </button>
         </div>
 
       </div>
@@ -155,11 +172,12 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `var(--hover-pill-${cmd.type})`}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `var(--bg-pill-${cmd.type})`}
-              className="text-xs md:text-sm px-3.5 py-1.5 rounded-full border transition-colors cursor-pointer"
+              className="text-[11px] font-bold uppercase tracking-wide font-sans px-4 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm transform active:scale-95"
             >
               {cmd.text}
             </button>
           ))}
+          
           {/* Dedicated Smiley Button mapping to its split variable setup */}
           <button 
             onClick={() => handlePillClick('Display Smiley Face')}
@@ -170,9 +188,9 @@ export default function TopologyCopilot({ status, setStatus, sessionName, setSes
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-pill-smiley)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-pill-smiley)'}
-            className="flex items-center gap-1.5 text-xs md:text-sm px-3.5 py-1.5 rounded-full border transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide font-sans px-4 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm transform active:scale-95"
           >
-            <Smile className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ color: 'var(--text-pill-smiley)' }} />
+            <Smile className="w-3.5 h-3.5" style={{ color: 'var(--text-pill-smiley)' }} />
             Smiley Face
           </button>
         </div>

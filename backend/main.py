@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 from datetime import datetime
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -169,10 +170,14 @@ async def chat_endpoint(payload: dict = Body(...)):
             
         elif user_message == "continue":
             system_time = get_server_time()
-            append_to_log(session_name, "user", user_stripped, user_log_time, 1) 
             
+            # --- FIXED ORDER OF OPERATIONS (POINT 3) ---
+            # 1. Pull current true state from history lines BEFORE logging anything new
             state_correction = get_session_state_from_file(session_name)
             active_stage = state_correction["stage"] if state_correction["stage"] != 0 else 1
+            
+            # 2. Append lines using the synchronized active stage variable
+            append_to_log(session_name, "user", user_stripped, user_log_time, active_stage) 
             append_to_log(session_name, "system", "Resuming session pipeline...", system_time, active_stage)
             
             refreshed_history = get_full_history(session_name)
@@ -222,18 +227,18 @@ async def chat_endpoint(payload: dict = Body(...)):
 @app.get("/api/list-sessions")
 async def list_sessions():
     sessions = []
+    if not os.path.exists(HISTORY_DIR):
+        return sessions
     for filename in os.listdir(HISTORY_DIR):
         if filename.endswith(".jsonl"):
             path = os.path.join(HISTORY_DIR, filename)
             mtime = os.path.getmtime(path)
-            # Standardized layout representation to synchronize with active log outputs
             sessions.append({
                 "name": filename.replace(".jsonl", ""),
                 "mtime_raw": mtime, 
                 "mtime_display": datetime.fromtimestamp(mtime).strftime("%m/%d/%Y %I:%M:%S %p")
             })
     
-    # Sort by raw timestamp
     sessions.sort(key=lambda x: x["mtime_raw"], reverse=True)
     return sessions
 
@@ -250,3 +255,31 @@ async def delete_session_endpoint(session_name: str):
             return {"status": "ERROR", "message": f"Failed to delete file: {str(e)}"}
     else:
         return {"status": "NOT_FOUND", "message": "Session target does not exist."}
+
+# --- SYSTEM CLONING PIPELINE ENDPOINT ---
+@app.post("/api/session/{source_name}/branch")
+async def branch_session_endpoint(source_name: str, payload: dict = Body(...)):
+    clean_source = source_name.strip()
+    new_name = payload.get("name", "").strip()
+    
+    # Validation Check 1: Enforce strict character limits
+    if not new_name or len(new_name) >= 18:
+        return {"status": "INVALID", "message": "Branch name must be between 1 and 17 characters."}
+        
+    source_path = get_file_path(clean_source)
+    target_path = get_file_path(new_name)
+    
+    # Validation Check 2: Verify if the source file actually exists to branch from
+    if not os.path.exists(source_path):
+        return {"status": "NOT_FOUND", "message": f"Source tracking log '{clean_source}' could not be located."}
+        
+    # Validation Check 3: Prevent destructive file overwrites if the targeted name exists
+    if os.path.exists(target_path):
+        return {"status": "EXISTS", "message": f"A data stream named '{new_name}' already exists."}
+        
+    # Execution Phase: Perform the hardware log duplication pipeline
+    try:
+        shutil.copyfile(source_path, target_path)
+        return {"status": "SUCCESS", "new_session": new_name}
+    except Exception as e:
+        return {"status": "ERROR", "message": f"File system collision replicating trace: {str(e)}"}

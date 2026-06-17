@@ -36,7 +36,8 @@ const ChatPanel = ({
         method: 'DELETE'
       });
       if (response.ok && onDeleteSuccess) {
-        onDeleteSuccess(); // Re-fetch active backend entries array immediately
+        // Pass the target name back to the parent so it can clean up routing or redirect if necessary
+        onDeleteSuccess(sessionTargetForDeletion); 
       }
     } catch (err) {
       console.error("Backend file unlink failure:", err);
@@ -134,10 +135,22 @@ const ChatPanel = ({
             <h3 className="text-sm font-bold uppercase tracking-wider text-red-400">
               Delete Chat Session
             </h3>
-            <p className="text-[11px] text-slate-300 font-sans">
-              Are you sure you want to delete this session? This action will securely wipe the session from storage and cannot be undone.
-            </p>
-            <div className="flex justify-end gap-2 text-[11px] font-bold mt-2">
+            
+            <div className="flex flex-col gap-3">
+              <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
+                Are you sure you want to delete this specific trace? This action will securely wipe all configuration backups from storage.
+              </p>
+              
+              {/* --- HIGHLIGHTED TARGET SESSION BLOCK --- */}
+              <div className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex items-center gap-2.5">
+                <span className="text-xs text-red-400 select-none">📁</span>
+                <span className="text-xs font-mono font-bold text-blue-400 tracking-wide truncate" title={sessionTargetForDeletion}>
+                  {sessionTargetForDeletion}.jsonl
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 text-[11px] font-bold mt-1">
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(false)}
