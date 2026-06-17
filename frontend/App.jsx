@@ -1,8 +1,10 @@
 /* frontend/App.jsx */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Zap, RotateCcw, Sun, Moon } from 'lucide-react';
 import TopologyCopilot from './src/components/TopologyCopilot.jsx';
+import BusTopologyMap from './src/components/BusTopologyMap.jsx';
+import AnalyticsStreamGallery from './src/components/AnalyticsStreamGallery.jsx';
 import './App.css'; 
 import ChatPanel from './src/components/ChatPanel.jsx';
 
@@ -11,6 +13,11 @@ function App() {
   const [sessionName, setSessionName] = useState("");
   const [initialData, setInitialData] = useState(null);
   
+  // --- DRAGGABLE PANEL WIDTH STATE & UNIFIED LAYOUT TRACKING ---
+  const [widths, setWidths] = useState([35, 35, 30]); // [Left %, Center %, Right %]
+  const containerRef = useRef(null);
+  const dragInfoRef = useRef({ isDragging: false, handleIndex: -1, startX: 0, startWidths: [] });
+
   // Instantly intercept browser disk memory on initial frame load, defaulting cleanly to 'light'
   const [currentTheme, setCurrentTheme] = useState(() => {
     return localStorage.getItem('ieee-dashboard-theme') || 'light';
@@ -83,8 +90,10 @@ function App() {
     window.history.pushState(null, '', newName ? `/${newName}` : '/');
   };
 
+  // --- REVERTS PANELS BACK TO PRECISE FACTORY BASIS (35-35-30) ---
   const handleResetLayout = () => {
-    console.log("Resetting topology map...");
+    console.log("Resetting dashboard topology grid to 35-35-30 layout configuration...");
+    setWidths([35, 35, 30]);
   };
 
   const fetchAllSessions = async () => {
@@ -150,6 +159,83 @@ function App() {
     }
   };
 
+  // --- RESIZE HANDLE EVENTS INTERCEPTION ---
+  const startResizeDrag = (handleIndex, e) => {
+    e.preventDefault();
+    dragInfoRef.current = {
+      isDragging: true,
+      handleIndex, 
+      startX: e.clientX,
+      startWidths: [...widths]
+    };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!dragInfoRef.current.isDragging || !containerRef.current) return;
+
+      const containerWidth = containerRef.current.offsetWidth;
+      const deltaX = e.clientX - dragInfoRef.current.startX;
+      const deltaPercent = (deltaX / containerWidth) * 100;
+
+      const { handleIndex, startWidths } = dragInfoRef.current;
+      const nextWidths = [...startWidths];
+      
+      const minPanelWidth = 10; 
+
+      if (handleIndex === 0) {
+        const requestedLeft = startWidths[0] + deltaPercent;
+        if (requestedLeft >= minPanelWidth) {
+          const absoluteChange = requestedLeft - startWidths[0];
+          const halfChange = absoluteChange / 2;
+
+          const requestedCenter = startWidths[1] - halfChange;
+          const requestedRight = startWidths[2] - halfChange;
+
+          if (requestedCenter >= minPanelWidth && requestedRight >= minPanelWidth) {
+            nextWidths[0] = requestedLeft;
+            nextWidths[1] = requestedCenter;
+            nextWidths[2] = requestedRight;
+            setWidths(nextWidths);
+          }
+        }
+      } else if (handleIndex === 1) {
+        const requestedRight = startWidths[2] - deltaPercent;
+        if (requestedRight >= minPanelWidth) {
+          const absoluteChange = requestedRight - startWidths[2];
+          const halfChange = absoluteChange / 2;
+
+          const requestedLeft = startWidths[0] - halfChange;
+          const requestedCenter = startWidths[1] - halfChange;
+
+          if (requestedLeft >= minPanelWidth && requestedCenter >= minPanelWidth) {
+            nextWidths[0] = requestedLeft;
+            nextWidths[1] = requestedCenter;
+            nextWidths[2] = requestedRight;
+            setWidths(nextWidths);
+          }
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (dragInfoRef.current.isDragging) {
+        dragInfoRef.current.isDragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [widths]);
+
   return (
     <div 
       data-theme={currentTheme} 
@@ -209,8 +295,49 @@ function App() {
       </header>
 
       {/* 2. LOWER WORKING AREA */}
-      <main className="w-full flex-1 flex justify-end items-end p-4 relative overflow-hidden">
-        <div className="w-[30%] h-full flex justify-end items-end relative">
+      <main 
+        ref={containerRef}
+        className="w-full flex-1 flex items-center p-4 relative overflow-hidden gap-2"
+      >
+        
+        {/* Left Layout Pane: Bus Topology Map */}
+        <div style={{ width: `calc(${widths[0]}% - 4px)` }} className="h-full flex-shrink-0 overflow-hidden">
+          <BusTopologyMap currentTheme={currentTheme} />
+        </div>
+
+        {/* Physical Drag Handle Divider 1 (Left to Center) */}
+        <div 
+          onMouseDown={(e) => startResizeDrag(0, e)}
+          className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center" 
+        >
+          {/* Visible physical grab pill shape bar using solid standard Tailwind grays & blues */}
+          <div className="w-1.5 h-14 rounded-full bg-gray-400/40 dark:bg-gray-700/60 group-hover:bg-blue-500/80 group-active:bg-blue-500 transition-all flex flex-col gap-0.5 justify-center items-center shadow-sm">
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+          </div>
+        </div>
+
+        {/* Center Layout Pane: Analytics Stream Gallery */}
+        <div style={{ width: `calc(${widths[1]}% - 4px)` }} className="h-full flex-shrink-0 overflow-hidden">
+          <AnalyticsStreamGallery currentTheme={currentTheme} />
+        </div>
+
+        {/* Physical Drag Handle Divider 2 (Center to Right) */}
+        <div 
+          onMouseDown={(e) => startResizeDrag(1, e)}
+          className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center" 
+        >
+          {/* Visible physical grab pill shape bar using solid standard Tailwind grays & blues */}
+          <div className="w-1.5 h-14 rounded-full bg-gray-400/40 dark:bg-gray-700/60 group-hover:bg-blue-500/80 group-active:bg-blue-500 transition-all flex flex-col gap-0.5 justify-center items-center shadow-sm">
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+            <span className="w-0.5 h-0.5 rounded-full bg-white opacity-70" />
+          </div>
+        </div>
+
+        {/* Right Layout Pane: Topology Copilot */}
+        <div style={{ width: `calc(${widths[2]}% - 4px)` }} className="h-full flex-shrink-0 flex justify-end items-end relative overflow-hidden">
           <div style={{ width: '123.333%', height: '123.333%', transform: 'scale(0.81081)', transformOrigin: 'bottom right', position: 'absolute', bottom: 0, right: 0 }}>
             <TopologyCopilot 
               status={sessionStatus} 
