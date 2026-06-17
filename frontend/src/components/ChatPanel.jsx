@@ -1,5 +1,7 @@
+/* frontend/src/components/ChatPanel.jsx */
+
 import React, { useState } from 'react';
-import '../styles/ChatPanel.css'; // Importing the style layer
+import '../styles/ChatPanel.css'; 
 
 const ChatPanel = ({ 
   isOpen, 
@@ -29,12 +31,20 @@ const ChatPanel = ({
 
   const submitDeleteSession = async () => {
     if (!sessionTargetForDeletion) return;
+    
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionTargetForDeletion)}`, {
         method: 'DELETE'
       });
-      if (response.ok && onDeleteSuccess) {
-        onDeleteSuccess(sessionTargetForDeletion); 
+      
+      if (response.ok) {
+        // Logic: If we are deleting the session currently active, redirect to root.
+        // Otherwise, just refresh the list and keep the drawer open.
+        if (sessionTargetForDeletion === currentSessionName) {
+          window.location.href = '/';
+        } else if (onDeleteSuccess) {
+          onDeleteSuccess(sessionTargetForDeletion);
+        }
       }
     } catch (err) {
       console.error("Backend file unlink failure:", err);
@@ -118,7 +128,7 @@ const ChatPanel = ({
           })}
 
           {sessions.length === 0 && (
-            <div className="text-center py-8 border border-dashed rounded-xl" style={{ borderColor: 'var(--cp-border-split)' }}>
+            <div className="text-center py-8 border border-dashed rounded-xl cp-empty-backlog-box" style={{ borderColor: 'var(--border-inner)' }}>
               <div className="text-[10px] font-bold uppercase tracking-wider cp-section-tag">No Backlogs Logged</div>
             </div>
           )}
@@ -139,7 +149,6 @@ const ChatPanel = ({
                 Are you sure you want to delete this specific trace? This action will securely wipe all configuration backups from storage.
               </p>
               
-              {/* --- HIGHLIGHTED TARGET SESSION BLOCK --- */}
               <div className="w-full border rounded-xl p-3 flex items-center gap-2.5 cp-modal-target-box">
                 <span className="text-xs text-red-400 select-none">📁</span>
                 <span className="text-xs font-mono font-bold text-blue-500 dark:text-blue-400 tracking-wide truncate" title={sessionTargetForDeletion}>

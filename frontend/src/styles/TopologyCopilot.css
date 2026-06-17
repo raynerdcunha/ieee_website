@@ -1,20 +1,27 @@
 /* src/styles/TopologyCopilot.css */
 
-/* 1. SHARED CONSTANTS (STATUS & BRANCH - NEVER CHANGE) */
+/* 1. SHARED CONSTANTS (BACKGROUND TINTS ONLY) */
 :root {
-  /* Status Badges */
-  --bg-status-inactive: rgba(153, 27, 27, 0.3); /* red-900/30 */
-  --text-status-inactive: #f87171;              /* red-400 */
-  --bg-status-active: rgba(30, 58, 138, 0.3);   /* blue-900/30 */
-  --text-status-active: #60a5fa;                /* blue-400 */
+  /* Status Badges Backgrounds */
+  --bg-status-inactive: rgba(153, 27, 27, 0.15); /* Soft red tint */
+  --bg-status-active: rgba(30, 58, 138, 0.15);   /* Soft blue tint */
   
-  /* Branch Badge */
-  --bg-branch: rgba(21, 128, 61, 0.3);          /* green-900/30 */
-  --text-branch: #4ade80;                       /* green-400 */
+  /* Branch Badge Background */
+  --bg-branch: rgba(21, 128, 61, 0.15);          /* Soft green tint */
 }
 
 /* 2. DARK THEME */
 [data-theme='dark'] {
+  /* High-Contrast Badges */
+  --text-status-inactive: #f87171;              /* Glowing red */
+  --text-status-active: #60a5fa;                /* Glowing blue */
+  --text-branch: #4ade80;                       /* Glowing green */
+
+  /* Chat Message Timestamps */
+  --text-user-timestamp: #93c5fd;               /* Soft sky blue */
+  --text-system-timestamp: #94a3b8;             /* Muted gray-blue */
+
+  /* Structural Shell */
   --bg-outer: #0b1329;
   --border-outer: rgba(30, 58, 138, 0.4);
   --text-header: #e2e8f0;
@@ -27,6 +34,7 @@
   --bg-system-bubble: rgba(15, 23, 42, 0.4);
   --border-system-bubble: rgba(30, 41, 59, 0.6);
 
+  /* Macro Action Pills */
   --bg-pill-isolate: #1e293b;
   --text-pill-isolate: #f1f5f9;
   --border-pill-isolate: #334155;
@@ -43,8 +51,8 @@
   --hover-pill-reset-p: #334155;
 
   --bg-pill-smiley: #1e293b;
-  --text-pill-smiley: #ca8a04;   /* UPDATED: Saturated Gold font color */
-  --border-pill-smiley: #ca8a04; /* UPDATED: Saturated Gold border */
+  --text-pill-smiley: #ca8a04;   /* Saturated Gold font color */
+  --border-pill-smiley: #ca8a04; /* Saturated Gold border */
   --hover-pill-smiley: #334155;
 
   --bg-pill-p-factor: #1e293b;
@@ -52,6 +60,7 @@
   --border-pill-p-factor: #334155;
   --hover-pill-p-factor: #334155;
 
+  /* Input Field */
   --bg-input: #020617;
   --text-input: #34d399;
   --placeholder-input: #475569;
@@ -59,55 +68,59 @@
 
 /* 3. LIGHT THEME */
 [data-theme='light'] {
-  /* Background: A soft "Ghost White" with a tiny blue tint to feel "techy" */
+  /* High-Contrast Deep Tones for Badges */
+  --text-status-inactive: #991b1b;              /* Deep red-800 text */
+  --text-status-active: #1e3a8a;                /* Deep navy-900 text */
+  --text-branch: #166534;                       /* Deep forest-800 text */
+
+  /* Chat Message Timestamps */
+  --text-user-timestamp: #2563eb;               /* Sharp, vivid blue (readable on light blue) */
+  --text-system-timestamp: #475569;             /* Clear dark slate (readable on light gray) */
+
+  /* Structural Shell */
   --bg-outer: #f8fafc;
   --border-outer: #e2e8f0;
-
-  /* Text: Dark slate instead of pure black for readability */
   --text-header: #1e293b;
   --text-main: #334155;
   --text-muted: #64748b;
-
-  /* Inner elements: Slightly darker than outer to create depth */
   --bg-inner: #f1f5f9;
   --border-inner: #cbd5e1;
 
-  /* Bubbles: Very light blue/gray tints */
-  --bg-user-bubble: #e0e7ff; /* Very soft indigo-tinted */
+  /* Bubbles */
+  --bg-user-bubble: #e0e7ff; 
   --border-user-bubble: #c7d2fe;
-  --bg-system-bubble: #e2e8f0; /* Soft neutral gray */
+  --bg-system-bubble: #e2e8f0; 
   --border-system-bubble: #cbd5e1;
 
-  /* Pills/Buttons: Clean, clickable, distinct */
+  /* Macro Action Pills */
   --bg-pill-isolate: #e2e8f0;
-  --text-pill-isolate: #475569;    /* FIXED: High contrast dark slate font */
+  --text-pill-isolate: #475569;    
   --border-pill-isolate: #475569;
   --hover-pill-isolate: #cbd5e1;
 
   --bg-pill-reset-n: #e2e8f0;
-  --text-pill-reset-n: #475569;    /* FIXED: High contrast dark slate font */
+  --text-pill-reset-n: #475569;    
   --border-pill-reset-n: #475569;
   --hover-pill-reset-n: #cbd5e1;
 
   --bg-pill-reset-p: #e2e8f0;
-  --text-pill-reset-p: #475569;    /* FIXED: High contrast dark slate font */
+  --text-pill-reset-p: #475569;    
   --border-pill-reset-p: #475569;
   --hover-pill-reset-p: #cbd5e1;
 
-  /* Inside [data-theme='light'] */
   --bg-pill-smiley: #f0f2fe;     /* Soft, tinted indigo background */
-  --text-pill-smiley: #4f46e5;   /* Deep, crisp indigo text (High contrast) */
+  --text-pill-smiley: #4f46e5;   /* Deep, crisp indigo text */
   --border-pill-smiley: #818cf8; /* Vibrant indigo accent border */
   --hover-pill-smiley: #e0e4fe;
 
   --bg-pill-p-factor: #e2e8f0;
-  --text-pill-p-factor: #475569;    /* FIXED: High contrast dark slate font */
+  --text-pill-p-factor: #475569;    
   --border-pill-p-factor: #475569;
   --hover-pill-p-factor: #cbd5e1;
 
-  /* Input: Solid white so it feels like an entry field, but with a refined border */
+  /* Input Field */
   --bg-input: #ffffff;
-  --text-input: #059669; /* A darker, readable emerald */
+  --text-input: #059669; 
   --placeholder-input: #94a3b8;
 }
 

@@ -1,3 +1,5 @@
+/* src/components/TopologyCopilot.jsx */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Zap, GitFork, Send, Smile } from 'lucide-react';
 import '../styles/TopologyCopilot.css'; 
@@ -9,7 +11,7 @@ export default function TopologyCopilot({
   setSessionName, 
   initialData, 
   currentTheme = "dark",
-  onBranchClick // Accepting the structural modal callback prop wired from App.jsx
+  onBranchClick // Structural layout callback wired natively from App.jsx
 }) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
@@ -128,7 +130,7 @@ export default function TopologyCopilot({
             {m.sender === 'user' ? (
               <div className="text-right w-full flex justify-end">
                 <div className="bg-[var(--bg-user-bubble)] px-4 py-3 rounded-xl rounded-tr-none border border-[var(--border-user-bubble)] font-mono shadow-md text-left max-w-[60%]">
-                  <span className="text-[10px] md:text-xs text-[var(--text-status-active)] font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-80">
+                  <span className="text-[10px] md:text-xs text-[var(--text-user-timestamp)] font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-90">
                     USER • {m.timestamp}
                   </span>
                   <div className="text-[var(--text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
@@ -139,7 +141,7 @@ export default function TopologyCopilot({
             ) : (
               <div className="text-left w-full">
                 <div className="bg-[var(--bg-system-bubble)] px-4 py-3 rounded-xl rounded-tl-none border border-[var(--border-system-bubble)] shadow-md w-fit max-w-[75%]">
-                  <span className="text-[10px] md:text-xs text-[var(--text-muted)] font-mono font-bold tracking-wider uppercase block mb-1.5">
+                  <span className="text-[10px] md:text-xs text-[var(--text-system-timestamp)] font-mono font-bold tracking-wider uppercase block mb-1.5">
                     SYSTEM • {m.timestamp}
                   </span>
                   <div className="text-[var(--text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
@@ -163,6 +165,7 @@ export default function TopologyCopilot({
             { text: 'Reset Parameters', type: 'reset-p' }
           ].map((cmd) => (
             <button 
+              type="button"
               key={cmd.text}
               onClick={() => handlePillClick(cmd.text)}
               style={{
@@ -180,6 +183,7 @@ export default function TopologyCopilot({
           
           {/* Dedicated Smiley Button mapping to its split variable setup */}
           <button 
+            type="button"
             onClick={() => handlePillClick('Display Smiley Face')}
             style={{
               backgroundColor: 'var(--bg-pill-smiley)',
@@ -207,8 +211,9 @@ export default function TopologyCopilot({
           className="flex-grow bg-[var(--bg-input)] border border-[var(--border-inner)] rounded-lg py-2.5 px-3 text-xs md:text-sm font-mono text-[var(--text-input)] placeholder-[var(--placeholder-input)] focus:outline-none focus:border-[var(--text-muted)]"
         />
         <button 
+          type="button"
           onClick={handleSendMessage} 
-          className="bg-[var(--bg-pill)] hover:bg-[var(--hover-pill)] p-2.5 rounded-lg border border-[var(--border-pill)] text-[var(--text-status-active)] transition-colors cursor-pointer flex items-center justify-center"
+          className="bg-[var(--bg-action)] hover:border-[var(--border-subtle)] p-2.5 rounded-lg border border-[var(--border-action)] text-[var(--text-status-active)] transition-all active:scale-95 cursor-pointer flex items-center justify-center"
         >
           <Send className="w-4 h-4 md:w-4.5 md:h-4.5" />
         </button>

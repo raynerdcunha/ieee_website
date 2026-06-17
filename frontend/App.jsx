@@ -1,3 +1,5 @@
+/* frontend/App.jsx */
+
 import React, { useState, useEffect } from 'react';
 import { Menu, Zap, RotateCcw, Sun, Moon } from 'lucide-react';
 import TopologyCopilot from './src/components/TopologyCopilot.jsx';
@@ -8,7 +10,12 @@ function App() {
   const [sessionStatus, setSessionStatus] = useState("Not Started");
   const [sessionName, setSessionName] = useState("");
   const [initialData, setInitialData] = useState(null);
-  const [currentTheme, setCurrentTheme] = useState("dark");
+  
+  // Instantly intercept browser disk memory on initial frame load, defaulting cleanly to 'light'
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return localStorage.getItem('ieee-dashboard-theme') || 'light';
+  });
+  
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [sessionList, setSessionList] = useState([]);
 
@@ -16,6 +23,11 @@ function App() {
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [branchNameInput, setBranchNameInput] = useState("");
   const [branchError, setBranchError] = useState("");
+
+  // Natively update browser local storage disk space whenever theme state changes
+  useEffect(() => {
+    localStorage.setItem('ieee-dashboard-theme', currentTheme);
+  }, [currentTheme]);
 
   useEffect(() => {
     const initializeSystem = async () => {
@@ -93,10 +105,8 @@ function App() {
 
   // --- TRIGGER ACTION FOR BRANCHING ---
   const handleOpenBranchModal = () => {
-    // Safety check constraint built right into the trigger function
     if (sessionStatus === "Not Started" || !sessionName) return;
     
-    // Safely crops the parent name to ensure the generated string stays under the 18-char boundary
     const croppedBase = sessionName.slice(0, 13);
     setBranchNameInput(`B_${croppedBase}`);
     setBranchError("");
@@ -128,7 +138,6 @@ function App() {
 
       if (res.ok && data.status === "SUCCESS") {
         setBranchModalOpen(false);
-        // Instant window location routing swap as dictated by your pipeline logic
         handleSessionNameChange(data.new_session);
         window.location.reload(); 
         return;
@@ -150,8 +159,9 @@ function App() {
       <header className="w-full h-14 min-h-14 flex items-center justify-between px-6 border-b border-subtle z-50">
         <div className="flex items-center gap-4">
           <button 
+            type="button"
             onClick={() => setIsChatOpen(true)}
-            className="p-2 icon-muted hover:text-primary hover:bg-surface rounded-lg border border-subtle active:scale-95 transition-all"
+            className="p-2 icon-muted hover:text-primary hover:bg-surface rounded-lg border border-subtle active:scale-95 transition-all cursor-pointer"
           >
             <Menu className="w-4 h-4" />
           </button>
@@ -176,16 +186,18 @@ function App() {
           </div>
 
           <button 
+            type="button"
             onClick={handleResetLayout}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-action bg-action hover:border-subtle font-mono text-[10px] md:text-xs font-bold uppercase active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-action bg-action hover:border-subtle font-mono text-[10px] md:text-xs font-bold uppercase active:scale-95 transition-all cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Layout</span>
           </button>
 
           <button 
+            type="button"
             onClick={() => setCurrentTheme(currentTheme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-lg border border-action bg-action hover:border-subtle text-primary active:scale-95 transition-all"
+            className="p-2 rounded-lg border border-action bg-action hover:border-subtle text-primary active:scale-95 transition-all cursor-pointer"
           >
             {currentTheme === "dark" ? (
               <Moon className="w-4 h-4 text-brand animate-pulse" />
@@ -207,7 +219,7 @@ function App() {
               setSessionName={handleSessionNameChange}  
               initialData={initialData}
               currentTheme={currentTheme}
-              onBranchClick={handleOpenBranchModal} // Passes down structural binding into copilot
+              onBranchClick={handleOpenBranchModal} 
             />
           </div>
         </div>
