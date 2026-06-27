@@ -2,8 +2,9 @@ import os
 import json
 import shutil
 from datetime import datetime
-from fastapi import FastAPI, Body  # <-- FIXED: Added Body here
+from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
+from topology import generate_grid_graph
 
 app = FastAPI()
 
@@ -30,10 +31,8 @@ def get_full_history(session_name: str):
     """Helper to parse logged entries and inject the initial welcome message."""
     file_path = get_file_path(session_name)
     history = []
-    
     if not os.path.exists(file_path):
         return history
-        
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
@@ -46,33 +45,23 @@ def get_full_history(session_name: str):
                     })
     except Exception as e:
         print(f"Error reading history: {e}")
-        
+
     # --- DYNAMIC WELCOME MESSAGE INJECTION ---
     initial_timestamp = history[0]["timestamp"] if history else get_server_time()
-    
     welcome_message = {
         "sender": "system",
         "content": "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin.",
         "timestamp": initial_timestamp
     }
-    
     history.insert(0, welcome_message)
     return history
 
 def get_session_state_from_file(session_name: str):
-    """
-    Reconstructs the current stage and parameters from the log.
-    Stage 0: Pending user choice (overwrite or continue)
-    Stage 1: Waiting for standard bus input
-    Stage 2: Processing grid topology commands
-    """
     file_path = get_file_path(session_name)
     if not os.path.exists(file_path):
         return {"stage": 1, "bus_system": ""}
-    
     last_stage = 1
     last_bus = ""
-    
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
@@ -103,23 +92,52 @@ async def init_endpoint():
     return {
         "reply": "Welcome to IEEE Grid ChatBot. Please enter Session Name to begin.",
         "status": "Not Started",
+        "stage": 1,
         "session_name": "",
         "timestamp": get_server_time()
     }
+
+@app.post("/api/session/create")
+async def create_session_endpoint(payload: dict = Body(...)):
+    session_name = payload.get("session_name", "").strip()
+    server_time = get_server_time()
+    if not session_name:
+        return {"status": "INVALID", "message": "Session name cannot be empty.", "stage": 1}
+    if len(session_name) >= 18:
+        return {"status": "INVALID", "message": "Session name must be under 18 characters.", "stage": 1}
+    
+    target_path = get_file_path(session_name)
+    if os.path.exists(target_path):
+        return {"status": "EXISTS", "message": f"Session '{session_name}' already exists.", "stage": 0}
+    
+    try:
+        system_reply = f"Session set to '{session_name}'. What standard bus are you using?"
+        append_to_log(session_name, "user", session_name, server_time, 1)
+        append_to_log(session_name, "system", system_reply, server_time, 1)
+        return {"status": "SUCCESS", "session_name": session_name, "stage": 1}
+    except Exception as e:
+        return {"status": "ERROR", "message": f"Failed to initialize trace: {str(e)}", "stage": 1}
 
 @app.get("/api/session/{session_name}")
 async def get_session_endpoint(session_name: str):
     clean_name = session_name.strip()
     if len(clean_name) >= 18:
-        return {"status": "INVALID", "reply": "Session name must be under 18 characters.", "timestamp": get_server_time()}
-        
+        return {"status": "INVALID", "reply": "Session name must be under 18 characters.", "stage": 1, "timestamp": get_server_time()}
+    
     target_path = get_file_path(clean_name)
     if os.path.exists(target_path):
         parsed_history = get_full_history(clean_name)
-        return {"status": "ACTIVE", "session_name": clean_name, "history": parsed_history}
+        state = get_session_state_from_file(clean_name)
+        return {
+            "status": "ACTIVE",
+            "session_name": clean_name,
+            "stage": state["stage"],
+            "bus_system": state["bus_system"],
+            "history": parsed_history
+        }
     else:
-        return {"status": "NOT_FOUND", "reply": f"Session '{clean_name}' does not exist.", "timestamp": get_server_time()}
-    
+        return {"status": "NOT_FOUND", "reply": f"Session '{clean_name}' does not exist.", "stage": 1, "timestamp": get_server_time()}
+
 @app.post("/api/chat")
 async def chat_endpoint(payload: dict = Body(...)):
     user_raw = payload.get("message", "")
@@ -131,26 +149,24 @@ async def chat_endpoint(payload: dict = Body(...)):
     if not session_name:
         if len(user_stripped) >= 18:
             system_reply = "Session name must be under 18 characters. Try again:"
-            return {"reply": system_reply, "status": "Not Started", "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
-        
+            return {"reply": system_reply, "status": "Not Started", "stage": 1, "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
         if not user_stripped:
             system_reply = "Session name cannot be empty. Please enter a valid name:"
-            return {"reply": system_reply, "status": "Not Started", "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
-
-        target_path = get_file_path(user_stripped)
+            return {"reply": system_reply, "status": "Not Started", "stage": 1, "session_name": "", "user_time": user_log_time, "system_time": get_server_time()}
         
+        target_path = get_file_path(user_stripped)
         if os.path.exists(target_path):
             system_reply = f"Session '{user_stripped}' already exists. Would you like to OVERWRITE or CONTINUE?"
             system_time = get_server_time()
             append_to_log(user_stripped, "user", user_stripped, user_log_time, 0)
             append_to_log(user_stripped, "system", system_reply, system_time, 0)
-            return {"reply": system_reply, "status": "Not Started", "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
+            return {"reply": system_reply, "status": "Not Started", "stage": 0, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
         else:
             system_reply = f"Session set to '{user_stripped}'. What standard bus are you using?"
             system_time = get_server_time()
             append_to_log(user_stripped, "user", user_stripped, user_log_time, 1)
             append_to_log(user_stripped, "system", system_reply, system_time, 1)
-            return {"reply": system_reply, "status": user_stripped, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
+            return {"reply": system_reply, "status": user_stripped, "stage": 1, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time}
 
     state = get_session_state_from_file(session_name)
     current_stage = state["stage"]
@@ -161,29 +177,24 @@ async def chat_endpoint(payload: dict = Body(...)):
                 os.remove(get_file_path(session_name))
             except:
                 pass
-            
             system_reply = "Previous session cleared. What standard bus are you using?"
             system_time = get_server_time()
             append_to_log(session_name, "system", system_reply, system_time, 1)
-            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
-            
+            return {"reply": system_reply, "status": session_name, "stage": 1, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
         elif user_message == "continue":
             system_time = get_server_time()
-            
             state_correction = get_session_state_from_file(session_name)
             active_stage = state_correction["stage"] if state_correction["stage"] != 0 else 1
-            
-            append_to_log(session_name, "user", user_stripped, user_log_time, active_stage) 
+            append_to_log(session_name, "user", user_stripped, user_log_time, active_stage)
             append_to_log(session_name, "system", "Resuming session pipeline...", system_time, active_stage)
-            
             refreshed_history = get_full_history(session_name)
-            return {"history": refreshed_history, "status": session_name, "session_name": session_name}
+            return {"history": refreshed_history, "status": session_name, "stage": active_stage, "bus_system": state_correction["bus_system"], "session_name": session_name}
         else:
             system_reply = "Invalid option. Please specify 'overwrite' or 'continue':"
             system_time = get_server_time()
             append_to_log(session_name, "user", user_stripped, user_log_time, 0)
             append_to_log(session_name, "system", system_reply, system_time, 0)
-            return {"reply": system_reply, "status": "Not Started", "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+            return {"reply": system_reply, "status": "Not Started", "stage": 0, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
     elif current_stage == 1:
         if user_stripped.isdigit():
@@ -191,13 +202,13 @@ async def chat_endpoint(payload: dict = Body(...)):
             system_time = get_server_time()
             append_to_log(session_name, "user", user_stripped, user_log_time, 1)
             append_to_log(session_name, "system", system_reply, system_time, 2)
-            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+            return {"reply": system_reply, "status": session_name, "stage": 2, "bus_system": user_stripped, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
         else:
             system_reply = "Please enter a valid numeric bus standard designation (e.g., 33):"
             system_time = get_server_time()
             append_to_log(session_name, "user", user_stripped, user_log_time, 1)
             append_to_log(session_name, "system", system_reply, system_time, 1)
-            return {"reply": system_reply, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+            return {"reply": system_reply, "status": session_name, "stage": 1, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
 
     else:
         if "isolate" in user_message:
@@ -212,12 +223,37 @@ async def chat_endpoint(payload: dict = Body(...)):
             response = "Grid visualization mode activated: 🤖 Matrix operations complete! 🌟"
         else:
             response = f"Command '{user_stripped}' not recognized. Try using the quick action macros below."
-            
+        
         system_time = get_server_time()
         append_to_log(session_name, "user", user_stripped, user_log_time, 2)
         append_to_log(session_name, "system", response, system_time, 2)
-        return {"reply": response, "status": session_name, "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+        return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time}
+
+# --- ADDED: TOPOLOGY VECTOR PLOT ENGINE LINK ---
+@app.get("/api/topology")
+async def get_topology(session_name: str):
+    """
+    Fetches computed mathematical vector positions directly from topology.py
+    """
+    # Find out what bus standard the user has chosen for this session
+    state = get_session_state_from_file(session_name)
+    bus_type = state.get("bus_system", "33") or "33"
     
+    try:
+        # Run your mathematical topology script dynamically!
+        grid_payload = generate_grid_graph(bus_type, ratio=0.55)
+        return grid_payload
+    except Exception as e:
+        # Fallback block to prevent UI crashes if processing fields are empty
+        return {
+            "data": [],
+            "layout": {
+                "title": {"text": f"Error loading grid mapping matrix: {str(e)}"},
+                "paper_bgcolor": "rgba(0,0,0,0)",
+                "plot_bgcolor": "rgba(0,0,0,0)"
+            }
+        }
+
 @app.get("/api/list-sessions")
 async def list_sessions():
     sessions = []
@@ -229,10 +265,9 @@ async def list_sessions():
             mtime = os.path.getmtime(path)
             sessions.append({
                 "name": filename.replace(".jsonl", ""),
-                "mtime_raw": mtime, 
+                "mtime_raw": mtime,
                 "mtime_display": datetime.fromtimestamp(mtime).strftime("%m/%d/%Y %I:%M:%S %p")
             })
-    
     sessions.sort(key=lambda x: x["mtime_raw"], reverse=True)
     return sessions
 
@@ -240,7 +275,6 @@ async def list_sessions():
 async def delete_session_endpoint(session_name: str):
     clean_name = session_name.strip()
     target_path = get_file_path(clean_name)
-    
     if os.path.exists(target_path):
         try:
             os.remove(target_path)
@@ -254,41 +288,35 @@ async def delete_session_endpoint(session_name: str):
 async def branch_session_endpoint(source_name: str, payload: dict = Body(...)):
     clean_source = source_name.strip()
     new_name = payload.get("name", "").strip()
-    
     if not new_name or len(new_name) >= 18:
         return {"status": "INVALID", "message": "Branch name must be between 1 and 17 characters."}
-        
+    
     source_path = get_file_path(clean_source)
     target_path = get_file_path(new_name)
     
     if not os.path.exists(source_path):
         return {"status": "NOT_FOUND", "message": f"Source tracking log '{clean_source}' could not be located."}
-        
     if os.path.exists(target_path):
         return {"status": "EXISTS", "message": f"A data stream named '{new_name}' already exists."}
-        
+    
     try:
         shutil.copyfile(source_path, target_path)
         return {"status": "SUCCESS", "new_session": new_name}
     except Exception as e:
         return {"status": "ERROR", "message": f"File system collision replicating trace: {str(e)}"}
-    
+
 @app.get("/api/compare")
 async def compare_sessions(s1: str, s2: str, s3: str):
-    """
-    Retrieves history for three parallel simulation sessions.
-    """
     try:
-        # FIXED: Changed get_session_history to get_full_history to match your file's helper name
         return {
-            "s1": {"history": get_full_history(s1)},
-            "s2": {"history": get_full_history(s2)},
-            "s3": {"history": get_full_history(s3)}
+            "s1": {"history": get_full_history(s1), "stage": get_session_state_from_file(s1)["stage"]},
+            "s2": {"history": get_full_history(s2), "stage": get_session_state_from_file(s2)["stage"]},
+            "s3": {"history": get_full_history(s3), "stage": get_session_state_from_file(s3)["stage"]}
         }
     except Exception as e:
         print(f"Error fetching compare data: {e}")
         return {
-            "s1": {"history": []},
-            "s2": {"history": []},
-            "s3": {"history": []}
+            "s1": {"history": [], "stage": 1},
+            "s2": {"history": [], "stage": 1},
+            "s3": {"history": [], "stage": 1}
         }

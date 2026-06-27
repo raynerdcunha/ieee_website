@@ -9,11 +9,17 @@ import './App.css';
 function App() {
   const [sessionStatus, setSessionStatus] = useState("Not Started");
   const [sessionName, setSessionName] = useState("");
+  const [sessionStage, setSessionStage] = useState(1); // Master component stage indicator for standard view
   
   // --- INITIAL DATA ARCHIVE PROFILES ---
   const [initialDataA, setInitialDataA] = useState(null);
   const [initialDataB, setInitialDataB] = useState(null);
   const [initialDataC, setInitialDataC] = useState(null);
+
+  // --- MULTI-SESSION INDEPENDENT STAGE CORES ---
+  const [stageA, setStageA] = useState(1);
+  const [stageB, setStageB] = useState(1);
+  const [stageC, setStageC] = useState(1);
   
   // --- DRAGGABLE INTERFACE SPLIT ENGINE ---
   const [widths, setWidths] = useState([33.33, 33.33, 33.34]); 
@@ -75,6 +81,11 @@ function App() {
           setInitialDataA(data.s1 ? (Array.isArray(data.s1) ? { history: data.s1 } : data.s1) : { history: [] });
           setInitialDataB(data.s2 ? (Array.isArray(data.s2) ? { history: data.s2 } : data.s2) : { history: [] });
           setInitialDataC(data.s3 ? (Array.isArray(data.s3) ? { history: data.s3 } : data.s3) : { history: [] });
+
+          setStageA(data.s1?.stage ?? 1);
+          setStageB(data.s2?.stage ?? 1);
+          setStageC(data.s3?.stage ?? 1);
+          setSessionStage(data.s1?.stage ?? 1);
         } catch (err) {
           console.error("Failed to parse cross-comparative data array profiles:", err);
           setInitialDataA({ history: [] });
@@ -96,10 +107,12 @@ function App() {
             window.history.pushState(null, '', '/'); 
             setSessionStatus("Not Started");
             setSessionName("");
+            setSessionStage(1);
             setInitialDataA(data);
           } else {
             setSessionStatus("Active"); 
             setSessionName(data.session_name || pathSlug);
+            setSessionStage(data.stage || 1);
             setInitialDataA(data);
           }
         } else {
@@ -110,6 +123,7 @@ function App() {
           const data = await response.json();
           setSessionStatus(data.status);
           setSessionName("");
+          setSessionStage(data.stage || 1);
           setInitialDataA(data);
         }
       } catch (err) {
@@ -256,6 +270,14 @@ function App() {
     };
   }, [widths]);
 
+  // Dynamic state synchronizer passed into Copilot terminals to catch real-time execution stage variations
+  const handleStageMutation = (mutatedStage) => {
+    setSessionStage(mutatedStage);
+    if (layoutMode === "compare") {
+      setStageA(mutatedStage);
+    }
+  };
+
   return (
     <div 
       data-theme={currentTheme} 
@@ -272,9 +294,17 @@ function App() {
             <Menu className="w-4 h-4 icon-muted" />
           </button>
 
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-full btn-action-feature">
+          <button
+            type="button"
+            onClick={() => {
+              window.history.pushState(null, '', '/');
+              window.location.reload(); 
+            }}
+            className="relative flex items-center justify-center w-8 h-8 rounded-full btn-action-feature active:scale-95 hover:scale-105 transition-all cursor-pointer border-0"
+            title="Escape back to base default route"
+          >
             <Zap className="w-4 h-4" />
-          </div>
+          </button>
 
           <div className="flex flex-col">
             <h1 className="text-xs md:text-sm font-black tracking-wider uppercase text-primary">
@@ -303,7 +333,7 @@ function App() {
             }}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full btn-action-feature font-mono text-[10px] md:text-xs font-bold uppercase active:scale-95 transition-all cursor-pointer"
           >
-            <span>{layoutMode !== "compare" ? "⚡ Multi-Session View" : "🖥️ Exit Multi-View"}</span>
+            <span>{layoutMode !== "compare" ? "⚡ Enter Multi-View" : "🖥️ Exit Multi-View"}</span>
           </button>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full badge-telemetry">
@@ -353,14 +383,14 @@ function App() {
               
               <div className="compare-scroll-workspace">
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
-                  <BusTopologyMap currentTheme={currentTheme} targetSession={sessionA} />
+                  <BusTopologyMap currentTheme={currentTheme} currentStage={stageA} targetSession={sessionA} />
                 </div>
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
                   <AnalyticsStreamGallery currentTheme={currentTheme} targetSession={sessionA} />
                 </div>
                 <div className="w-full h-[440px] rounded-xl overflow-hidden relative flex-shrink-0">
                   <div style={{ width: '125%', height: '125%', transform: 'scale(0.8)', transformOrigin: 'top left' }} className="absolute inset-0">
-                    <TopologyCopilot status={sessionStatus} setStatus={setSessionStatus} sessionName={sessionA} setSessionName={() => {}} initialData={initialDataA} currentTheme={currentTheme} hideHeader={true} />
+                    <TopologyCopilot status={sessionStatus} setStatus={setSessionStatus} onStageChange={handleStageMutation} sessionName={sessionA} setSessionName={() => {}} initialData={initialDataA} currentTheme={currentTheme} hideHeader={true} />
                   </div>
                 </div>
               </div>
@@ -384,14 +414,14 @@ function App() {
               
               <div className="compare-scroll-workspace">
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
-                  <BusTopologyMap currentTheme={currentTheme} targetSession={sessionB} />
+                  <BusTopologyMap currentTheme={currentTheme} currentStage={stageB} targetSession={sessionB} />
                 </div>
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
                   <AnalyticsStreamGallery currentTheme={currentTheme} targetSession={sessionB} />
                 </div>
                 <div className="w-full h-[440px] rounded-xl overflow-hidden relative flex-shrink-0">
                   <div style={{ width: '125%', height: '125%', transform: 'scale(0.8)', transformOrigin: 'top left' }} className="absolute inset-0">
-                    <TopologyCopilot status={"Active"} setStatus={() => {}} sessionName={sessionB} setSessionName={() => {}} initialData={initialDataB} currentTheme={currentTheme} hideHeader={true} />
+                    <TopologyCopilot status={"Active"} setStatus={() => {}} onStageChange={(st) => setStageB(st)} sessionName={sessionB} setSessionName={() => {}} initialData={initialDataB} currentTheme={currentTheme} hideHeader={true} />
                   </div>
                 </div>
               </div>
@@ -415,14 +445,14 @@ function App() {
               
               <div className="compare-scroll-workspace">
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
-                  <BusTopologyMap currentTheme={currentTheme} targetSession={sessionC} />
+                  <BusTopologyMap currentTheme={currentTheme} currentStage={stageC} targetSession={sessionC} />
                 </div>
                 <div className="w-full rounded-xl overflow-hidden h-[320px] flex-shrink-0">
                   <AnalyticsStreamGallery currentTheme={currentTheme} targetSession={sessionC} />
                 </div>
                 <div className="w-full h-[440px] rounded-xl overflow-hidden relative flex-shrink-0">
                   <div style={{ width: '125%', height: '125%', transform: 'scale(0.8)', transformOrigin: 'top left' }} className="absolute inset-0">
-                    <TopologyCopilot status={"Active"} setStatus={() => {}} sessionName={sessionC} setSessionName={() => {}} initialData={initialDataC} currentTheme={currentTheme} hideHeader={true} />
+                    <TopologyCopilot status={"Active"} setStatus={() => {}} onStageChange={(st) => setStageC(st)} sessionName={sessionC} setSessionName={() => {}} initialData={initialDataC} currentTheme={currentTheme} hideHeader={true} />
                   </div>
                 </div>
               </div>
@@ -432,20 +462,20 @@ function App() {
           /* STANDARD BASE CO-PILOT DASHBOARD STATE PANELS */
           <>
             <div style={{ width: `calc(${widths[0]}% - 4px)` }} className="h-full flex-shrink-0 overflow-hidden">
-              <BusTopologyMap currentTheme={currentTheme} />
+              <BusTopologyMap currentTheme={currentTheme} currentStage={sessionStage} targetSession={sessionName} />
             </div>
             <div onMouseDown={(e) => startResizeDrag(0, e)} className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center">
               <div className="w-1.5 h-12 rounded-full splitter-handle-bar transition-all" />
             </div>
             <div style={{ width: `calc(${widths[1]}% - 4px)` }} className="h-full flex-shrink-0 overflow-hidden">
-              <AnalyticsStreamGallery currentTheme={currentTheme} />
+              <AnalyticsStreamGallery currentTheme={currentTheme} targetSession={sessionName} />
             </div>
             <div onMouseDown={(e) => startResizeDrag(1, e)} className="w-2 h-full cursor-col-resize flex-shrink-0 z-30 mx-[-4px] relative group flex items-center justify-center">
               <div className="w-1.5 h-12 rounded-full splitter-handle-bar transition-all" />
             </div>
             <div style={{ width: `calc(${widths[2]}% - 4px)` }} className="h-full flex-shrink-0 flex justify-end items-end relative overflow-hidden">
               <div style={{ width: '123.333%', height: '123.333%', transform: 'scale(0.81081)', transformOrigin: 'bottom right', position: 'absolute', bottom: 0, right: 0 }}>
-                <TopologyCopilot status={sessionStatus} setStatus={setSessionStatus} sessionName={sessionName} setSessionName={handleSessionNameChange} initialData={initialDataA} currentTheme={currentTheme} onBranchClick={handleOpenBranchModal} />
+                <TopologyCopilot status={sessionStatus} setStatus={setSessionStatus} onStageChange={handleStageMutation} sessionName={sessionName} setSessionName={handleSessionNameChange} initialData={initialDataA} currentTheme={currentTheme} onBranchClick={handleOpenBranchModal} />
               </div>
             </div>
           </>
@@ -519,9 +549,20 @@ function App() {
                     setCompareError("Operational identifiers required across all comparative columns.");
                     return;
                   }
-                  setCompareModalOpen(false);
+
                   const s1 = sessionName || "default";
-                  window.history.pushState(null, '', `/compare?s1=${encodeURIComponent(s1)}&s2=${encodeURIComponent(selectTrackB)}&s3=${encodeURIComponent(selectTrackC)}`);
+                  const s2 = selectTrackB;
+                  const s3 = selectTrackC;
+
+                  if (s1 === s2 || s1 === s3 || s2 === s3) {
+                    setCompareError("Duplicate assignment error: Each matrix column must display a unique tracking session.");
+                    return;
+                  }
+
+                  setCompareError("");
+                  setCompareModalOpen(false);
+                  
+                  window.history.pushState(null, '', `/compare?s1=${encodeURIComponent(s1)}&s2=${encodeURIComponent(s2)}&s3=${encodeURIComponent(s3)}`);
                   window.location.reload();
                 }}
                 className="px-4 py-2 rounded-xl btn-modal-confirm"

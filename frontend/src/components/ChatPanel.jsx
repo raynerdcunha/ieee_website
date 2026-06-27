@@ -8,8 +8,14 @@ const ChatPanel = ({
   currentSessionName,
   onDeleteSuccess 
 }) => {
+  // --- DELETE MODAL STATE REGISTRY ---
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [sessionTargetForDeletion, setSessionTargetForDeletion] = useState(null);
+
+  // --- NEW SESSION INTERCEPTION MODAL STATE REGISTRY ---
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [newSessionNameInput, setNewSessionNameInput] = useState("");
+  const [creationError, setCreationError] = useState("");
 
   const handleSelectSession = (session) => {
     const target = typeof session === 'string' ? session : session.name;
@@ -17,9 +23,49 @@ const ChatPanel = ({
     onClose();
   };
 
-  const handleNewChat = () => {
-    window.location.href = '/';
-    onClose();
+  // Overwritten to open the state configuration modal instead of instant routing
+  const handleNewChatClick = () => {
+    setNewSessionNameInput("");
+    setCreationError("");
+    setCreateModalOpen(true);
+  };
+
+  const submitCreateSession = async () => {
+    const trimmedName = newSessionNameInput.strip ? newSessionNameInput.strip() : newSessionNameInput.trim();
+    setCreationError("");
+
+    if (!trimmedName) {
+      setCreationError("Session name cannot be empty.");
+      return;
+    }
+
+    if (trimmedName.length >= 18) {
+      setCreationError("Session name must be under 18 characters.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/session/create", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_name: trimmedName })
+      });
+      
+      const data = await response.json();
+
+      if (data.status === "SUCCESS") {
+        setCreateModalOpen(false);
+        onClose();
+        // Route seamlessly directly to the newly verified logging channel
+        window.location.href = `/${encodeURIComponent(data.session_name)}`;
+      } else {
+        // Displays exact fallback errors (e.g., "Session already exists.")
+        setCreationError(data.message || "Failed to initialize standard session path.");
+      }
+    } catch (err) {
+      console.error("Infrastructure creation request failure:", err);
+      setCreationError("Server infrastructure communication breakdown.");
+    }
   };
 
   const handleOpenDeleteModal = (targetName, e) => {
@@ -80,7 +126,7 @@ const ChatPanel = ({
         <div className="p-4 border-b cp-action-container">
           <button
             type="button"
-            onClick={handleNewChat}
+            onClick={handleNewChatClick}
             className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold uppercase tracking-wide cursor-pointer pointer-events-auto transition-colors border-0"
           >
             + Start New Chat
@@ -133,6 +179,56 @@ const ChatPanel = ({
           )}
         </div>
       </aside>
+
+      {/* CUSTOM OVERLAY MODAL: Initialize New Trace Session Log */}
+      {createModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div className="absolute inset-0 modal-overlay-bg" onClick={() => setCreateModalOpen(false)} />
+          <div className="relative w-full max-w-sm modal-frame-surface rounded-2xl shadow-2xl p-6 z-10 flex flex-col gap-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-modal-header">
+              Initialize New Session
+            </h3>
+            
+            <p className="text-[11px] text-modal-body-desc leading-relaxed">
+              Enter a unique trace signature name to instantiate your standard power system performance monitor pipeline.
+            </p>
+
+            <div className="flex flex-col gap-1 mt-1">
+              <input 
+                type="text" 
+                value={newSessionNameInput} 
+                onChange={(e) => setNewSessionNameInput(e.target.value)} 
+                onKeyDown={(e) => e.key === 'Enter' && submitCreateSession()} 
+                placeholder="Session name (max 17 chars)..." 
+                className="w-full input-form-control rounded-xl py-2 px-3 text-xs font-mono focus:outline-none"
+                maxLength={25} // Allow typing beyond 17 to naturally trigger validation error feedback
+              />
+              {creationError && (
+                <span className="text-[10px] text-error-feedback font-semibold px-1 mt-1">
+                  ⚠️ {creationError}
+                </span>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 text-[11px] font-bold mt-1">
+              <button
+                type="button"
+                onClick={() => setCreateModalOpen(false)}
+                className="px-4 py-2 rounded-xl input-form-control cursor-pointer border-0"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitCreateSession}
+                className="px-4 py-2 rounded-xl btn-modal-confirm cursor-pointer border-0"
+              >
+                Submit Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CUSTOM OVERLAY MODAL: Confirm Delete Session */}
       {deleteModalOpen && (

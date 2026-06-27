@@ -11,7 +11,8 @@ export default function TopologyCopilot({
   setSessionName, 
   initialData, 
   currentTheme = "dark",
-  onBranchClick 
+  onBranchClick,
+  onStageChange // ADDED: Stage mutation callback hook
 }) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
@@ -46,7 +47,6 @@ export default function TopologyCopilot({
     setInputValue(''); 
 
     try {
-      // FIXED: Pointing directly to /api/chat to match your main.py
       const response = await fetch("http://127.0.0.1:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -74,6 +74,11 @@ export default function TopologyCopilot({
             timestamp: data.system_time || data.timestamp || new Date().toLocaleTimeString() 
           }
         ]);
+      }
+      
+      // FIXED: Dispatches state stage alterations to App.jsx to unlock the mapping view canvas instantly
+      if (data.stage && typeof onStageChange === 'function') {
+        onStageChange(data.stage);
       }
       
       if (setStatus && data.status) setStatus(data.status);
