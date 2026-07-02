@@ -19,3 +19,41 @@
   --bus-text-header: #f8fafc;   /* slate-50 */
   --bus-text-muted: #64748b;    /* slate-500 */
 }
+
+/* --- NATIVE PLOTLY OVERLAY RESETS --- */
+/* Removes structural box shadows and frames from the native Plotly controls wrapper */
+.modebar-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-right: 8px !important;
+  padding-top: 4px !important;
+}
+
+.modebar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.modebar-group {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Adjusts icon alignment sizes slightly inside the layout */
+.modebar-btn svg {
+  position: relative;
+  top: 1px;
+}
+
+/* Optional: Slight color adjustment for native icons to fit the dashboard theme */
+.modebar-btn path {
+  fill: var(--bus-text-muted) !important;
+}
+
+.modebar-btn:hover path,
+.modebar-btn.active path {
+  fill: #3b82f6 !important; /* Tailwind blue-500 matching your live indicator */
+}
