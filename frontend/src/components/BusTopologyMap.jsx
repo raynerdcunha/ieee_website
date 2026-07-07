@@ -11,7 +11,8 @@ export default function BusTopologyMap({
   refreshTrigger = 0,
   historicalMessage = null,
   onClearHistoricalView = null,
-  onBranchFromHistory = null
+  onBranchFromHistory = null,
+  onMaximizeToggle = null
 }) {
   const [plotData, setPlotData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -147,7 +148,11 @@ export default function BusTopologyMap({
   };
 
   const handleToggleFullscreenModal = () => {
-    console.log("Future implementation hook: Launching viewport lightbox canvas...");
+    if (typeof onMaximizeToggle === 'function') {
+      onMaximizeToggle();
+    } else {
+      console.log("Future implementation hook: Launching viewport lightbox canvas...");
+    }
   };
 
   return (
@@ -179,18 +184,18 @@ export default function BusTopologyMap({
           <button
             type="button"
             onClick={handleDownloadPNG}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase rounded-md border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 hover:text-white transition-all cursor-pointer select-none active:scale-95"
+            className="btn-bus-download flex items-center gap-1.5 px-2.5 py-1 text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase rounded-md transition-all cursor-pointer select-none active:scale-95"
           >
-            <Download className="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <Download className="w-3 h-3 md:w-3.5 md:h-3.5 icon-bus-download" />
             <span className="hidden sm:inline">Download PNG</span>
           </button>
           <button
             type="button"
             onClick={handleToggleFullscreenModal}
             title="Expand View Screen"
-            className="p-1.5 rounded-md border border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer select-none active:scale-95 flex items-center justify-center w-7 h-7 md:w-8 md:h-8"
+            className="btn-bus-maximize p-1.5 rounded-md transition-all cursor-pointer select-none active:scale-95 flex items-center justify-center w-7 h-7 md:w-8 md:h-8"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4 icon-bus-maximize">
               <path d="M 4 8 L 4 4 L 8 4 M 16 4 L 20 4 L 20 8 M 20 16 L 20 20 L 16 20 M 8 20 L 4 20 L 4 16" />
             </svg>
           </button>

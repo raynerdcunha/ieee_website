@@ -8,6 +8,36 @@
   --analytics-border-inner: #cbd5e1;  /* slate-300 */
   --analytics-text-header: #0f172a;   /* slate-900 */
   --analytics-text-muted: #64748b;    /* slate-500 */
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — ANALYTICS GALLERY (LIGHT)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-analytics-zip: "Download ZIP" bundle export button */
+  --analytics-zip-btn-bg: rgba(248, 250, 252, 0.9);
+  --analytics-zip-btn-border: #cbd5e1;
+  --analytics-zip-btn-text: #475569;
+  --analytics-zip-btn-bg-hover: #f1f5f9;
+  --analytics-zip-btn-text-hover: #0f172a;
+  --analytics-zip-icon-stroke: #64748b;
+
+  /* btn-analytics-chart-download: Per-chart individual PNG download icon */
+  --analytics-chart-dl-bg: transparent;
+  --analytics-chart-dl-text: #64748b;
+  --analytics-chart-dl-bg-hover: #f1f5f9;
+  --analytics-chart-dl-text-hover: #1e293b;
+
+  /* btn-analytics-chart-maximize: Per-chart expand to modal icon */
+  --analytics-chart-mx-bg: transparent;
+  --analytics-chart-mx-text: #64748b;
+  --analytics-chart-mx-bg-hover: #f1f5f9;
+  --analytics-chart-mx-text-hover: #1e293b;
+
+  /* btn-analytics-chart-minimize: Collapse modal to gallery icon */
+  --analytics-chart-mn-bg: transparent;
+  --analytics-chart-mn-text: #64748b;
+  --analytics-chart-mn-bg-hover: #f1f5f9;
+  --analytics-chart-mn-text-hover: #1e293b;
 }
 
 /* --- DARK THEME TOKENS --- */
@@ -18,4 +48,34 @@
   --analytics-border-inner: #334155;  /* slate-700 */
   --analytics-text-header: #f8fafc;   /* slate-50 */
   --analytics-text-muted: #64748b;    /* slate-500 */
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — ANALYTICS GALLERY (DARK)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-analytics-zip */
+  --analytics-zip-btn-bg: rgba(30, 41, 59, 0.4);
+  --analytics-zip-btn-border: #334155;
+  --analytics-zip-btn-text: #cbd5e1;
+  --analytics-zip-btn-bg-hover: #1e293b;
+  --analytics-zip-btn-text-hover: #ffffff;
+  --analytics-zip-icon-stroke: #94a3b8;
+
+  /* btn-analytics-chart-download */
+  --analytics-chart-dl-bg: transparent;
+  --analytics-chart-dl-text: #94a3b8;
+  --analytics-chart-dl-bg-hover: rgba(30, 41, 59, 0.6);
+  --analytics-chart-dl-text-hover: #f1f5f9;
+
+  /* btn-analytics-chart-maximize */
+  --analytics-chart-mx-bg: transparent;
+  --analytics-chart-mx-text: #94a3b8;
+  --analytics-chart-mx-bg-hover: rgba(30, 41, 59, 0.6);
+  --analytics-chart-mx-text-hover: #f1f5f9;
+
+  /* btn-analytics-chart-minimize */
+  --analytics-chart-mn-bg: transparent;
+  --analytics-chart-mn-text: #94a3b8;
+  --analytics-chart-mn-bg-hover: rgba(30, 41, 59, 0.6);
+  --analytics-chart-mn-text-hover: #f1f5f9;
 }

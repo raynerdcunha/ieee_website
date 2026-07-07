@@ -8,6 +8,26 @@
   --bus-border-inner: #cbd5e1;  /* slate-300 */
   --bus-text-header: #0f172a;   /* slate-900 */
   --bus-text-muted: #64748b;    /* slate-500 */
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — BUS TOPOLOGY MAP (LIGHT)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-bus-download: Download PNG export button */
+  --bus-download-btn-bg: rgba(248, 250, 252, 0.9);
+  --bus-download-btn-border: #cbd5e1;
+  --bus-download-btn-text: #475569;
+  --bus-download-btn-bg-hover: #f1f5f9;
+  --bus-download-btn-text-hover: #0f172a;
+  --bus-download-icon-stroke: #64748b;
+
+  /* btn-bus-maximize: Fullscreen expand button */
+  --bus-maximize-btn-bg: rgba(248, 250, 252, 0.9);
+  --bus-maximize-btn-border: #cbd5e1;
+  --bus-maximize-btn-text: #64748b;
+  --bus-maximize-btn-bg-hover: #f1f5f9;
+  --bus-maximize-btn-text-hover: #0f172a;
+  --bus-maximize-icon-stroke: #64748b;
 }
 
 /* --- DARK THEME TOKENS --- */
@@ -18,7 +38,53 @@
   --bus-border-inner: #334155;  /* slate-700 */
   --bus-text-header: #f8fafc;   /* slate-50 */
   --bus-text-muted: #64748b;    /* slate-500 */
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — BUS TOPOLOGY MAP (DARK)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-bus-download */
+  --bus-download-btn-bg: rgba(30, 41, 59, 0.4);
+  --bus-download-btn-border: #334155;
+  --bus-download-btn-text: #cbd5e1;
+  --bus-download-btn-bg-hover: #1e293b;
+  --bus-download-btn-text-hover: #ffffff;
+  --bus-download-icon-stroke: #94a3b8;
+
+  /* btn-bus-maximize */
+  --bus-maximize-btn-bg: rgba(30, 41, 59, 0.4);
+  --bus-maximize-btn-border: #334155;
+  --bus-maximize-btn-text: #94a3b8;
+  --bus-maximize-btn-bg-hover: #1e293b;
+  --bus-maximize-btn-text-hover: #ffffff;
+  --bus-maximize-icon-stroke: #94a3b8;
 }
+
+/* --- ISOLATED BUTTON UTILITY CLASSES --- */
+
+/* Download PNG Button */
+.btn-bus-download {
+  background-color: var(--bus-download-btn-bg);
+  border: 1px solid var(--bus-download-btn-border);
+  color: var(--bus-download-btn-text);
+}
+.btn-bus-download:hover {
+  background-color: var(--bus-download-btn-bg-hover);
+  color: var(--bus-download-btn-text-hover);
+}
+.icon-bus-download { stroke: var(--bus-download-icon-stroke); }
+
+/* Maximize / Fullscreen Button */
+.btn-bus-maximize {
+  background-color: var(--bus-maximize-btn-bg);
+  border: 1px solid var(--bus-maximize-btn-border);
+  color: var(--bus-maximize-btn-text);
+}
+.btn-bus-maximize:hover {
+  background-color: var(--bus-maximize-btn-bg-hover);
+  color: var(--bus-maximize-btn-text-hover);
+}
+.icon-bus-maximize { stroke: var(--bus-maximize-icon-stroke); }
 
 /* --- NATIVE PLOTLY OVERLAY RESETS --- */
 /* Removes structural box shadows and frames from the native Plotly controls wrapper */
@@ -48,12 +114,12 @@
   top: 1px;
 }
 
-/* Optional: Slight color adjustment for native icons to fit the dashboard theme */
+/* Color adjustment for native Plotly icons to fit the dashboard theme */
 .modebar-btn path {
   fill: var(--bus-text-muted) !important;
 }
 
 .modebar-btn:hover path,
 .modebar-btn.active path {
-  fill: #3b82f6 !important; /* Tailwind blue-500 matching your live indicator */
+  fill: #3b82f6 !important;
 }

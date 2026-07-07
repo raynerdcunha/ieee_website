@@ -3,9 +3,13 @@ import os
 import json
 import shutil
 import re
+import io
+import zipfile
+import base64
 from datetime import datetime
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from topology import generate_grid_graph
 
 app = FastAPI()
@@ -141,21 +145,47 @@ def append_snapshot_to_log(session_name: str, snapshot: dict, timestamp: str, st
     with open(file_path, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry) + "\n")
 
+def get_serialized_figure(session_name: str, state_seq_id: int) -> dict:
+    file_path = get_file_path(session_name)
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        entry = json.loads(line.strip())
+                        if entry.get("sender") == "plotly_figure" and entry.get("state_seq_id") == state_seq_id:
+                            return entry.get("figure")
+        except Exception as e:
+            print(f"Error reading figure from log: {e}")
+    return None
+
+def append_figure_to_log(session_name: str, figure: dict, state_seq_id: int):
+    if get_serialized_figure(session_name, state_seq_id) is not None:
+        return
+    file_path = get_file_path(session_name)
+    log_entry = {
+        "session_name": session_name,
+        "sender": "plotly_figure",
+        "timestamp": get_server_time(),
+        "state_seq_id": state_seq_id,
+        "figure": figure
+    }
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
 def parse_and_modify_grid(command_str: str, current_state: dict) -> tuple[dict, str]:
     pattern = r"^\s*([vpqrx])\s*([\+=\-\*/])\s*([\d\.]+)\s*\[\s*(.*?)\s*\]\s*$"
     match = re.match(pattern, command_str.strip().lower())
     if not match:
         raise ValueError("⚠️ Syntax Error: Command format unrecognized. Use parameter[operator][value] [bus_numbers]. Example: v=1.05 [22]")
-    
     param, op, val_raw, target_raw = match.groups()
     val = float(val_raw)
     target_raw = target_raw.strip()
-    
     updated_state = {k: list(v) for k, v in current_state.items()}
     target_array = updated_state[param]
     max_limit = len(target_array)
     indices_to_modify = []
-    
     if target_raw == "all":
         indices_to_modify = list(range(max_limit))
     else:
@@ -240,6 +270,38 @@ async def get_session_endpoint(session_name: str):
     else:
         return {"status": "NOT_FOUND", "reply": f"Session '{clean_name}' does not exist.", "stage": 1, "timestamp": get_server_time()}
 
+# --- ATOMIC ANALYTICS MULTI-GRAPH ZIP EXPORT ENGINE --- #
+@app.post("/api/analytics/zip-export")
+async def zip_export_analytics_endpoint(payload: dict = Body(...)):
+    """
+    Accepts client-side raw canvas image data strings from Plotly snapshot promises,
+    decodes base64 buffers directly into file streams, and yields a clean output compressed archive.
+    """
+    images = payload.get("images", {})
+    if not images:
+        raise HTTPException(status_code=400, detail="No active graph stream canvas discovered in current payload packet.")
+    
+    zip_buffer = io.BytesIO()
+    try:
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for filename, data_uri in images.items():
+                if "," in data_uri:
+                    header, base64_data = data_uri.split(",", 1)
+                else:
+                    base64_data = data_uri
+                
+                file_bytes = base64.b64decode(base64_data)
+                zip_file.writestr(f"{filename}.png", file_bytes)
+        
+        zip_buffer.seek(0)
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": "attachment; filename=grid_analytics_export.zip"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Atomic file system compression failed: {str(e)}")
+
 @app.post("/api/chat")
 async def chat_endpoint(payload: dict = Body(...)):
     user_raw = payload.get("message", "")
@@ -247,7 +309,7 @@ async def chat_endpoint(payload: dict = Body(...)):
     user_stripped = user_raw.strip()
     user_message = user_stripped.lower()
     user_log_time = get_server_time()
-
+    
     if not session_name:
         if len(user_stripped) >= 18:
             system_reply = "Session name must be under 18 characters. Try again:"
@@ -268,11 +330,11 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(user_stripped, "user", user_stripped, user_log_time, 1, 0)
             append_to_log(user_stripped, "system", system_reply, system_time, 1, 0)
             return {"reply": system_reply, "status": user_stripped, "stage": 1, "session_name": user_stripped, "user_time": user_log_time, "system_time": system_time, "state_seq_id": 0}
-
+            
     state = get_session_state_from_file(session_name)
     current_stage = state["stage"]
     current_seq_id = state["max_state_seq_id"]
-
+    
     if current_stage == 0:
         if user_message == "overwrite":
             try:
@@ -299,7 +361,7 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(session_name, "user", user_stripped, user_log_time, 0, 0)
             append_to_log(session_name, "system", system_reply, system_time, 0, 0)
             return {"reply": system_reply, "status": "Not Started", "stage": 0, "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": 0}
-
+            
     elif current_stage == 1:
         if user_stripped.isdigit():
             next_seq_id = current_seq_id + 1
@@ -320,7 +382,7 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(session_name, "user", user_stripped, user_log_time, 1, current_seq_id)
             append_to_log(session_name, "system", system_reply, system_time, 1, current_seq_id)
             return {"reply": system_reply, "status": session_name, "stage": 1, "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": current_seq_id}
-
+            
     else:
         if session_name not in SESSION_GRID_STATE:
             defaults = get_engineering_defaults(state.get("bus_system", "33"))
@@ -328,10 +390,22 @@ async def chat_endpoint(payload: dict = Body(...)):
                 "baseline": defaults,
                 "active": {k: list(v) for k, v in defaults.items()}
             }
+            
+        # --- CONDITIONAL INTERCEPTIONS FOR POWER FACTOR VIEWS --- #
+        if "remove power factor" in user_message:
+            response = "📉 Power factor performance metric plots decoupled from active viewport tracker."
+            system_time = get_server_time()
+            append_to_log(session_name, "user", user_stripped, user_log_time, 2, current_seq_id)
+            append_to_log(session_name, "system", response, system_time, 2, current_seq_id)
+            return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": current_seq_id, "hide_pf": True}
+            
+        elif "power factor" in user_message:
+            response = "📊 Calculating system vector arrays. Power factor optimization matrices attached to active viewport."
+            system_time = get_server_time()
+            append_to_log(session_name, "user", user_stripped, user_log_time, 2, current_seq_id)
+            append_to_log(session_name, "system", response, system_time, 2, current_seq_id)
+            return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": current_seq_id, "show_pf": True}
 
-        # ✅ Hardcoded "change voltage" translation block successfully removed.
-        # Grid adjustments are processed dynamically via the syntax regex matching criteria.
-        
         is_syntax_command = re.match(r"^\s*([vpqrx])\s*([\+=\-\*/])\s*([\d\.]+)\s*\[\s*(.*?)\s*\]\s*$", user_stripped.lower())
         if is_syntax_command:
             try:
@@ -350,7 +424,7 @@ async def chat_endpoint(payload: dict = Body(...)):
                 append_to_log(session_name, "user", user_stripped, user_log_time, 2, current_seq_id)
                 append_to_log(session_name, "system", response, system_time, 2, current_seq_id)
                 return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": current_seq_id}
-
+                
         elif "isolate" in user_message:
             raw_lines = user_message.replace("isolate", "").strip()
             line_tokens = [t.strip() for t in raw_lines.split(",") if t.strip()]
@@ -388,7 +462,7 @@ async def chat_endpoint(payload: dict = Body(...)):
                     append_to_log(session_name, "user", user_stripped, user_log_time, 2, current_seq_id)
                     append_to_log(session_name, "system", response, system_time, 2, current_seq_id)
                     return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": current_seq_id}
-
+                    
         elif "reset network" in user_message:
             next_seq_id = current_seq_id + 1
             base_reference = SESSION_GRID_STATE[session_name]["baseline"]
@@ -399,14 +473,12 @@ async def chat_endpoint(payload: dict = Body(...)):
             append_to_log(session_name, "system", response, system_time, 2, next_seq_id)
             append_snapshot_to_log(session_name, SESSION_GRID_STATE[session_name]["active"], system_time, 2, next_seq_id)
             return {"reply": response, "status": session_name, "stage": 2, "bus_system": state.get("bus_system", ""), "session_name": session_name, "user_time": user_log_time, "system_time": system_time, "state_seq_id": next_seq_id}
-
-        elif "power factor" in user_message:
-            response = "Calculating active power vectors. Power factor optimization matrices logged."
+            
         elif "display smiley face" in user_message:
             response = "Grid visualization mode activated: 🤖 Matrix operations complete! 🌟"
         else:
             response = f"Command '{user_stripped}' not recognized. Try using the quick action macros below."
-
+            
         system_time = get_server_time()
         append_to_log(session_name, "user", user_stripped, user_log_time, 2, current_seq_id)
         append_to_log(session_name, "system", response, system_time, 2, current_seq_id)
@@ -415,6 +487,12 @@ async def chat_endpoint(payload: dict = Body(...)):
 @app.get("/api/topology")
 async def get_topology(session_name: str):
     state = get_session_state_from_file(session_name)
+    current_seq_id = state.get("max_state_seq_id", 0)
+    
+    cached_fig = get_serialized_figure(session_name, current_seq_id)
+    if cached_fig is not None:
+        return cached_fig
+
     bus_type = state.get("bus_system", "33") or "33"
     if session_name in SESSION_GRID_STATE:
         active_data = SESSION_GRID_STATE[session_name]["active"]
@@ -440,6 +518,7 @@ async def get_topology(session_name: str):
             x_array=x_arr,
             unused_lines=unused_lines_arr
         )
+        append_figure_to_log(session_name, grid_payload, current_seq_id)
         return grid_payload
     except Exception as e:
         return {
@@ -454,6 +533,10 @@ async def get_topology(session_name: str):
 @app.get("/api/topology/historical")
 async def get_historical_topology(session_name: str, state_seq_id: int):
     """Scans the log up to a specific state_seq_id to rebuild the power grid topology instantly."""
+    cached_fig = get_serialized_figure(session_name, state_seq_id)
+    if cached_fig is not None:
+        return cached_fig
+
     state = get_session_state_from_file(session_name)
     bus_type = state.get("bus_system", "33") or "33"
     file_path = get_file_path(session_name)
@@ -482,6 +565,7 @@ async def get_historical_topology(session_name: str, state_seq_id: int):
             x_array=historical_vectors.get("x"),
             unused_lines=historical_vectors.get("unused_lines")
         )
+        append_figure_to_log(session_name, grid_payload, state_seq_id)
         return grid_payload
     except Exception as e:
         return {
@@ -492,6 +576,7 @@ async def get_historical_topology(session_name: str, state_seq_id: int):
                 "plot_bgcolor": "rgba(0,0,0,0)"
             }
         }
+
 
 @app.get("/api/list-sessions")
 async def list_sessions():

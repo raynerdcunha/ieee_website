@@ -20,28 +20,6 @@
   --border-modal-edge: #334155;
   --bg-panel-surface: #0b1329;
   
-  /* Navigation & Interactive Utility Elements */
-  --bg-nav-button: rgba(2, 6, 23, 0.6);
-  --border-nav-button: #1e293b;
-  --text-nav-button: #f1f5f9;
-  --icon-nav-muted: #94a3b8;
-  --hover-nav-button-bg: rgba(30, 41, 59, 0.8);
-  --hover-nav-button-text: #ffffff;
-
-  /* View Feature Toggles */
-  --bg-action-feature-soft: rgba(30, 58, 138, 0.4);
-  --border-action-feature: rgba(59, 130, 246, 0.4);
-  --text-action-feature: #60a5fa;
-  
-  /* Modals & Inputs */
-  --bg-modal-confirm-button: #2563eb;
-  --text-modal-confirm-button: #ffffff;
-  --hover-modal-confirm-button: #1d4ed8;
-  --bg-form-input: rgba(30, 41, 59, 0.4);
-  --border-form-input: #334155;
-  --text-form-input: #f1f5f9;
-  --focus-form-input-border: #3b82f6;
-  
   /* Telemetry Network Badge */
   --bg-telemetry-badge: rgba(6, 78, 59, 0.2);
   --border-telemetry-badge: rgba(6, 78, 59, 0.4);
@@ -57,6 +35,73 @@
   --text-system-error: #f87171;
   --scrollbar-thumb-bg: #1e293b;
   --scrollbar-track-bg: rgba(2, 6, 23, 0.2);
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — APP HEADER
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-menu-sidebar: Left hamburger menu icon */
+  --menu-sidebar-btn-bg: rgba(2, 6, 23, 0.6);
+  --menu-sidebar-btn-border: #1e293b;
+  --menu-sidebar-btn-bg-hover: rgba(30, 41, 59, 0.8);
+  --menu-sidebar-icon-clr: #94a3b8;
+
+  /* btn-home-zap: Home/Zap navigation beacon button */
+  --home-zap-btn-bg: rgba(30, 58, 138, 0.4);
+  --home-zap-btn-border: rgba(59, 130, 246, 0.4);
+  --home-zap-btn-bg-hover: rgba(59, 130, 246, 0.2);
+  --home-zap-icon-clr: #60a5fa;
+
+  /* btn-historical-back: "Back to Present" time-travel escape button */
+  --hist-back-btn-bg: #f59e0b;
+  --hist-back-btn-text: #000000;
+  --hist-back-btn-bg-hover: #fbbf24;
+  --hist-back-icon-clr: #000000;
+
+  /* btn-multiview-enter: Enter / Exit Multi-View feature toggle */
+  --mv-btn-bg: rgba(30, 58, 138, 0.4);
+  --mv-btn-border: rgba(59, 130, 246, 0.4);
+  --mv-btn-text: #60a5fa;
+
+  /* btn-reset-layout: Reset Layout utility button */
+  --reset-btn-bg: rgba(2, 6, 23, 0.6);
+  --reset-btn-border: #1e293b;
+  --reset-btn-text: #f1f5f9;
+  --reset-btn-bg-hover: rgba(30, 41, 59, 0.8);
+  --reset-btn-text-hover: #ffffff;
+  --reset-icon-clr: #94a3b8;
+
+  /* btn-theme-toggle: Moon/Sun theme switch */
+  --theme-toggle-btn-bg: rgba(2, 6, 23, 0.6);
+  --theme-toggle-btn-border: #1e293b;
+  --theme-toggle-btn-bg-hover: rgba(30, 41, 59, 0.8);
+  --theme-moon-icon-clr: #60a5fa;
+  --theme-sun-icon-clr: #fb923c;
+  --theme-sun-icon-clr-hover: #fbbf24;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — MODALS & FORMS
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-modal-confirm: Confirm/submit action in modal dialogs */
+  --modal-confirm-btn-bg: #2563eb;
+  --modal-confirm-btn-text: #ffffff;
+  --modal-confirm-btn-bg-hover: #1d4ed8;
+
+  /* input-form-control / select-form-control */
+  --form-ctrl-bg: rgba(30, 41, 59, 0.4);
+  --form-ctrl-border: #334155;
+  --form-ctrl-text: #f1f5f9;
+  --form-ctrl-border-focus: #3b82f6;
+
+  /* layout-box-item: Grid layout selector boxes in Layout Selection popup */
+  --layout-box-bg: transparent;
+  --layout-box-border: #334155;
+  --layout-box-bg-hover: rgba(30, 41, 59, 0.2);
+  --layout-box-border-hover: #3b82f6;
+  --layout-box-slot-bg: rgba(37, 99, 235, 0.25);
+  --layout-box-slot-border: rgba(59, 130, 246, 0.2);
+  --layout-box-label-clr: #e2e8f0;
 }
 
 /* --- THEME: LIGHT --- */
@@ -76,28 +121,6 @@
   --border-modal-edge: #cbd5e1;
   --bg-panel-surface: #ffffff;
   
-  /* Navigation & Interactive Utility Elements */
-  --bg-nav-button: #ffffff;
-  --border-nav-button: #cbd5e1;
-  --text-nav-button: #475569;
-  --icon-nav-muted: #475569;
-  --hover-nav-button-bg: #f1f5f9;
-  --hover-nav-button-text: #0f172a;
-
-  /* View Feature Toggles */
-  --bg-action-feature-soft: rgba(219, 234, 254, 0.7);
-  --border-action-feature: rgba(37, 99, 235, 0.3);
-  --text-action-feature: #1d4ed8;
-  
-  /* Modals & Inputs */
-  --bg-modal-confirm-button: #1d4ed8;
-  --text-modal-confirm-button: #ffffff;
-  --hover-modal-confirm-button: #1e40af;
-  --bg-form-input: #ffffff;
-  --border-form-input: #cbd5e1;
-  --text-form-input: #0f172a;
-  --focus-form-input-border: #1d4ed8;
-  
   /* Telemetry Network Badge */
   --bg-telemetry-badge: rgba(16, 185, 129, 0.1);
   --border-telemetry-badge: rgba(16, 185, 129, 0.25);
@@ -113,6 +136,73 @@
   --text-system-error: #ef4444;
   --scrollbar-thumb-bg: #cbd5e1;
   --scrollbar-track-bg: rgba(241, 245, 249, 0.5);
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — APP HEADER (LIGHT)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-menu-sidebar */
+  --menu-sidebar-btn-bg: #ffffff;
+  --menu-sidebar-btn-border: #cbd5e1;
+  --menu-sidebar-btn-bg-hover: #f1f5f9;
+  --menu-sidebar-icon-clr: #475569;
+
+  /* btn-home-zap */
+  --home-zap-btn-bg: rgba(219, 234, 254, 0.7);
+  --home-zap-btn-border: rgba(37, 99, 235, 0.3);
+  --home-zap-btn-bg-hover: rgba(191, 219, 254, 0.6);
+  --home-zap-icon-clr: #1d4ed8;
+
+  /* btn-historical-back */
+  --hist-back-btn-bg: #f59e0b;
+  --hist-back-btn-text: #000000;
+  --hist-back-btn-bg-hover: #fbbf24;
+  --hist-back-icon-clr: #000000;
+
+  /* btn-multiview-enter */
+  --mv-btn-bg: rgba(219, 234, 254, 0.7);
+  --mv-btn-border: rgba(37, 99, 235, 0.3);
+  --mv-btn-text: #1d4ed8;
+
+  /* btn-reset-layout */
+  --reset-btn-bg: #ffffff;
+  --reset-btn-border: #cbd5e1;
+  --reset-btn-text: #475569;
+  --reset-btn-bg-hover: #f1f5f9;
+  --reset-btn-text-hover: #0f172a;
+  --reset-icon-clr: #475569;
+
+  /* btn-theme-toggle */
+  --theme-toggle-btn-bg: #ffffff;
+  --theme-toggle-btn-border: #cbd5e1;
+  --theme-toggle-btn-bg-hover: #f1f5f9;
+  --theme-moon-icon-clr: #2563eb;
+  --theme-sun-icon-clr: #fb923c;
+  --theme-sun-icon-clr-hover: #fbbf24;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — MODALS & FORMS (LIGHT)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-modal-confirm */
+  --modal-confirm-btn-bg: #1d4ed8;
+  --modal-confirm-btn-text: #ffffff;
+  --modal-confirm-btn-bg-hover: #1e40af;
+
+  /* input-form-control / select-form-control */
+  --form-ctrl-bg: #ffffff;
+  --form-ctrl-border: #cbd5e1;
+  --form-ctrl-text: #0f172a;
+  --form-ctrl-border-focus: #1d4ed8;
+
+  /* layout-box-item */
+  --layout-box-bg: transparent;
+  --layout-box-border: #cbd5e1;
+  --layout-box-bg-hover: rgba(219, 234, 254, 0.3);
+  --layout-box-border-hover: #1d4ed8;
+  --layout-box-slot-bg: rgba(29, 78, 216, 0.12);
+  --layout-box-slot-border: rgba(37, 99, 235, 0.2);
+  --layout-box-label-clr: #1e293b;
 }
 
 /* --- INTERFACE CORE LAYOUT UTILITIES --- */
@@ -121,23 +211,64 @@
 .text-secondary { color: var(--text-header-subtitle); }
 
 .border-b-header { border-bottom: 1px solid var(--border-header-edge); }
-.btn-nav-utility {
-  background-color: var(--bg-nav-button);
-  border: 1px solid var(--border-nav-button);
-  color: var(--text-nav-button);
-}
-.btn-nav-utility:hover {
-  background-color: var(--hover-nav-button-bg);
-  color: var(--hover-nav-button-text);
-}
-.icon-muted { color: var(--icon-nav-muted); }
 
-.btn-action-feature {
-  background-color: var(--bg-action-feature-soft);
-  border: 1px solid var(--border-action-feature);
-  color: var(--text-action-feature);
+/* ── Header Left Cluster ── */
+.btn-menu-sidebar {
+  background-color: var(--menu-sidebar-btn-bg);
+  border: 1px solid var(--menu-sidebar-btn-border);
+}
+.btn-menu-sidebar:hover { background-color: var(--menu-sidebar-btn-bg-hover); }
+.icon-menu-sidebar { color: var(--menu-sidebar-icon-clr); }
+
+.btn-home-zap {
+  background-color: var(--home-zap-btn-bg);
+  border: 1px solid var(--home-zap-btn-border);
+}
+.btn-home-zap:hover { background-color: var(--home-zap-btn-bg-hover); }
+.icon-home-zap { color: var(--home-zap-icon-clr); }
+
+/* ── Historical back-to-present ── */
+.btn-hist-back {
+  background-color: var(--hist-back-btn-bg);
+  color: var(--hist-back-btn-text);
+}
+.btn-hist-back:hover { background-color: var(--hist-back-btn-bg-hover); }
+.icon-hist-back { color: var(--hist-back-icon-clr); }
+
+/* ── Right Control Deck ── */
+.btn-multiview {
+  background-color: var(--mv-btn-bg);
+  border: 1px solid var(--mv-btn-border);
+  color: var(--mv-btn-text);
 }
 
+.btn-reset-layout {
+  background-color: var(--reset-btn-bg);
+  border: 1px solid var(--reset-btn-border);
+  color: var(--reset-btn-text);
+}
+.btn-reset-layout:hover {
+  background-color: var(--reset-btn-bg-hover);
+  color: var(--reset-btn-text-hover);
+}
+.icon-reset-layout { color: var(--reset-icon-clr); }
+
+.btn-theme-toggle {
+  background-color: var(--theme-toggle-btn-bg);
+  border: 1px solid var(--theme-toggle-btn-border);
+}
+.btn-theme-toggle:hover { background-color: var(--theme-toggle-btn-bg-hover); }
+.icon-moon { color: var(--theme-moon-icon-clr); }
+.icon-sun {
+  color: var(--theme-sun-icon-clr);
+  transition: color 0.3s ease, transform 0.5s ease;
+}
+.icon-sun:hover {
+  color: var(--theme-sun-icon-clr-hover);
+  transform: rotate(135deg);
+}
+
+/* ── Telemetry Badge ── */
 .badge-telemetry {
   background-color: var(--bg-telemetry-badge);
   border: 1px solid var(--border-telemetry-badge);
@@ -145,11 +276,52 @@
 .text-telemetry { color: var(--text-telemetry-status); }
 .bg-telemetry-dot { background-color: var(--bg-telemetry-pulse-dot); }
 
+/* ── Modal & Form Controls ── */
+.modal-overlay-bg { background-color: var(--bg-modal-backdrop-mask); backdrop-filter: blur(4px); }
+.modal-frame-surface {
+  background-color: var(--bg-panel-surface);
+  border: 1px solid var(--border-modal-edge);
+}
+.text-modal-header { color: var(--text-modal-titles); }
+.text-modal-body-desc { color: var(--text-modal-body); }
+.label-form-input { color: var(--text-input-labels); }
+
+.input-form-control, .select-form-control {
+  background-color: var(--form-ctrl-bg);
+  border: 1px solid var(--form-ctrl-border);
+  color: var(--form-ctrl-text);
+}
+.input-form-control:focus, .select-form-control:focus {
+  border-color: var(--form-ctrl-border-focus) !important;
+}
+
+.btn-modal-confirm {
+  background-color: var(--modal-confirm-btn-bg);
+  color: var(--modal-confirm-btn-text);
+}
+.btn-modal-confirm:hover { background-color: var(--modal-confirm-btn-bg-hover); }
+.text-error-feedback { color: var(--text-system-error); }
+
+/* ── Layout Selection Box Items ── */
+.layout-box-item {
+  background-color: var(--layout-box-bg);
+  border-color: var(--layout-box-border);
+}
+.layout-box-item:hover {
+  background-color: var(--layout-box-bg-hover);
+  border-color: var(--layout-box-border-hover);
+}
+.layout-box-slot {
+  background-color: var(--layout-box-slot-bg);
+  border: 1px solid var(--layout-box-slot-border);
+}
+.layout-box-label { color: var(--layout-box-label-clr); }
+
 /* --- RESIZABLE MATRIX STORAGE WRAPPERS --- */
 .panel-container-compare {
   border: 1px solid var(--border-panel-edge);
   background-color: var(--bg-panel-surface);
-  padding: 0 !important; /* Managed cleanly via interior margins to stop edge bleeding */
+  padding: 0 !important;
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
@@ -164,7 +336,7 @@
   z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: center; /* Beautifully centers your text headers */
+  justify-content: center;
   border-bottom: 1px solid var(--border-header-edge);
   width: 100%;
 }
@@ -196,8 +368,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* Generous gap between vertically stacked components */
-  padding: 1.25rem; /* Forces balanced gaps away from all left, right, and bottom borders */
+  gap: 1.25rem;
+  padding: 1.25rem;
 }
 
 /* Splitter Bar Handle Styles */
@@ -210,29 +382,6 @@
 .group:active .splitter-handle-bar {
   background-color: var(--handle-splitter-active) !important;
 }
-
-/* Modals & Inputs formatting specifications */
-.modal-overlay-bg { background-color: var(--bg-modal-backdrop-mask); backdrop-filter: blur(4px); }
-.modal-frame-surface {
-  background-color: var(--bg-panel-surface);
-  border: 1px solid var(--border-modal-edge);
-}
-.text-modal-header { color: var(--text-modal-titles); }
-.text-modal-body-desc { color: var(--text-modal-body); }
-.label-form-input { color: var(--text-input-labels); }
-
-.input-form-control, .select-form-control {
-  background-color: var(--bg-form-input);
-  border: 1px solid var(--border-form-input);
-  color: var(--text-form-input);
-}
-.input-form-control:focus, .select-form-control:focus {
-  border-color: var(--focus-form-input-border) !important;
-}
-
-.btn-modal-confirm { background-color: var(--bg-modal-confirm-button); color: var(--text-modal-confirm-button); }
-.btn-modal-confirm:hover { background-color: var(--hover-modal-confirm-button); }
-.text-error-feedback { color: var(--text-system-error); }
 
 /* --- CUSTOM SCROLLBAR ENGINE --- */
 .custom-scrollbar::-webkit-scrollbar {
@@ -260,7 +409,3 @@
   50% { opacity: 0.3; transform: scale(1.8); }
   100% { opacity: 1; transform: scale(1); }
 }
-
-.icon-sun { transition: all 0.5s ease; }
-[data-theme='light'] .icon-sun { color: #fb923c; }
-[data-theme='light'] .icon-sun:hover { color: #fbbf24; transform: rotate(135deg); }

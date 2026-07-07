@@ -64,6 +64,35 @@
   --copilot-bg-action: #e2e8f0;
   --copilot-border-action: #cbd5e1;
   --copilot-border-subtle: #94a3b8;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — TOPOLOGY COPILOT (LIGHT)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-copilot-branch-history: "Branch State" amber button in historical mode */
+  --copilot-branch-hist-btn-bg: rgba(245, 158, 11, 0.15);
+  --copilot-branch-hist-btn-border: rgba(245, 158, 11, 0.4);
+  --copilot-branch-hist-btn-text: #92400e;
+  --copilot-branch-hist-btn-bg-hover: #f59e0b;
+  --copilot-branch-hist-btn-text-hover: #000000;
+  --copilot-branch-hist-icon-clr: #92400e;
+
+  /* btn-copilot-branch-active: "Branch Chat" button in live mode */
+  --copilot-branch-live-btn-bg: rgba(21, 128, 61, 0.12);
+  --copilot-branch-live-btn-border: rgba(21, 128, 61, 0.4);
+  --copilot-branch-live-btn-text: #166534;
+  --copilot-branch-live-btn-bg-hover: rgba(21, 128, 61, 0.22);
+  --copilot-branch-live-icon-clr: #166534;
+
+  /* btn-copilot-send: Send message submit button */
+  --copilot-send-btn-bg: #e2e8f0;
+  --copilot-send-btn-border: #cbd5e1;
+  --copilot-send-icon-clr: #1e3a8a;
+  --copilot-send-btn-border-hover: #94a3b8;
+
+  /* icon-copilot-zap: Status badge lightning bolt */
+  --copilot-zap-icon-clr-inactive: #991b1b;
+  --copilot-zap-icon-clr-active: #1e3a8a;
 }
 
 /* 2. OVERRIDE TRACE FOR DARK ENGINE MODE (UPSTREAM LINKED) */
@@ -128,6 +157,35 @@
   --copilot-bg-action: #1e293b;
   --copilot-border-action: #334155;
   --copilot-border-subtle: #475569;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ISOLATED BUTTON & ICON VARIABLES — TOPOLOGY COPILOT (DARK)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* btn-copilot-branch-history */
+  --copilot-branch-hist-btn-bg: rgba(245, 158, 11, 0.18);
+  --copilot-branch-hist-btn-border: rgba(245, 158, 11, 0.4);
+  --copilot-branch-hist-btn-text: #fcd34d;
+  --copilot-branch-hist-btn-bg-hover: #f59e0b;
+  --copilot-branch-hist-btn-text-hover: #000000;
+  --copilot-branch-hist-icon-clr: #fcd34d;
+
+  /* btn-copilot-branch-active */
+  --copilot-branch-live-btn-bg: rgba(21, 128, 61, 0.15);
+  --copilot-branch-live-btn-border: rgba(51, 65, 85, 0.8);
+  --copilot-branch-live-btn-text: #4ade80;
+  --copilot-branch-live-btn-bg-hover: rgba(21, 128, 61, 0.30);
+  --copilot-branch-live-icon-clr: #4ade80;
+
+  /* btn-copilot-send */
+  --copilot-send-btn-bg: #1e293b;
+  --copilot-send-btn-border: #334155;
+  --copilot-send-icon-clr: #60a5fa;
+  --copilot-send-btn-border-hover: #475569;
+
+  /* icon-copilot-zap */
+  --copilot-zap-icon-clr-inactive: #f87171;
+  --copilot-zap-icon-clr-active: #60a5fa;
 }
 
 /* --- SHARED SCROLLBAR STYLES --- */

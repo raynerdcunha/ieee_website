@@ -1,64 +1,267 @@
 /* src/components/AnalyticsStreamGallery.jsx */
-import React from 'react';
-import { Download, History } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import Plot from 'react-plotly.js';
+import { Download, Maximize2, Minimize2, FileArchive, History } from 'lucide-react';
 import '../styles/AnalyticsStreamGallery.css';
 
-export default function AnalyticsStreamGallery({ currentTheme = "light", historicalMessage = null }) {
-  // ✅ Updated conditional tracking logic to look for explicit tracking IDs rather than arbitrary clock parameters
-  const isHistoricalMode = !!(historicalMessage && historicalMessage.state_seq_id !== undefined && historicalMessage.state_seq_id !== 0);
+export default function AnalyticsStreamGallery({ 
+  sessionData, 
+  userPromptOutput, 
+  currentTheme = "light", 
+  historicalMessage = null 
+}) {
+  const [maximizedChart, setMaximizedChart] = useState(null);
+  const [showPowerFactor, setShowPowerFactor] = useState(false);
 
-  return (
-    <div
-      data-theme={currentTheme}
-      className={`bg-[var(--analytics-bg-outer)] rounded-xl p-4 border shadow-xl flex flex-col h-full w-full overflow-hidden transition-all duration-300 ${
-        isHistoricalMode ? 'border-amber-500/50 shadow-amber-950/20 ring-1 ring-amber-500/20' : 'border-[var(--analytics-border-outer)]'
+  // Individual chart references bound for DOM-canvas extraction
+  const vRef = useRef(null);
+  const pRef = useRef(null);
+  const qRef = useRef(null);
+  const pfRef = useRef(null);
+
+  // Monitor chat actions or historical commands for Power Factor state modification
+  useEffect(() => {
+    if (!userPromptOutput) return;
+    if (userPromptOutput.show_pf) setShowPowerFactor(true);
+    if (userPromptOutput.hide_pf) setShowPowerFactor(false);
+  }, [userPromptOutput]);
+
+  // Historical state activation flag tracking sequence indices
+  const isHistoricalMode = !!(
+    historicalMessage && 
+    historicalMessage.state_seq_id !== undefined && 
+    historicalMessage.state_seq_id !== 0
+  );
+
+  // Parse active payload vectors and calculate True Power Factor dynamically
+  const plotData = useMemo(() => {
+    if (!sessionData || !sessionData.active) {
+      return { labels: [], v: [], p: [], q: [], pf: [] };
+    }
+
+    const { v = [], p = [], q = [] } = sessionData.active;
+    const labels = v.map((_, index) => `Bus ${index + 1}`);
+    
+    const pf = p.map((pVal, idx) => {
+      const qVal = q[idx] || 0;
+      const den = Math.sqrt(pVal * pVal + qVal * qVal);
+      return den === 0 ? 1.0 : parseFloat((pVal / den).toFixed(4));
+    });
+
+    return { labels, v, p, q, pf };
+  }, [sessionData]);
+
+  // Triggers client-side browser download of individual images
+  const handleIndividualDownload = async (chartRef, title) => {
+    if (!chartRef.current) return;
+    const Plotly = window.Plotly;
+    await Plotly.downloadImage(chartRef.current.el, {
+      format: 'png',
+      width: 1000,
+      height: 500,
+      filename: `${title.toLowerCase().replace(/\s+/g, '_')}`
+    });
+  };
+
+  // Packs active canvases and hits backend API pipeline for archival zip bundling
+  const handleZipDownload = async () => {
+    const Plotly = window.Plotly;
+    const refs = [
+      { r: vRef, n: 'voltage' },
+      { r: pRef, n: 'active_power' },
+      { r: qRef, n: 'reactive_power' }
+    ];
+
+    if (showPowerFactor) {
+      refs.push({ r: pfRef, n: 'power_factor' });
+    }
+
+    const images = {};
+    try {
+      await Promise.all(
+        refs.map(async (t) => {
+          if (t.r.current) {
+            const dataUrl = await Plotly.toImage(t.r.current.el, {
+              format: 'png',
+              width: 1000,
+              height: 500
+            });
+            images[t.n] = dataUrl;
+          }
+        })
+      );
+
+      const res = await fetch("http://127.0.0.1:8000/api/analytics/zip-export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images })
+      });
+
+      if (!res.ok) throw new Error("Backend compilation error");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "grid_analytics.zip";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to generate zip export stream:", err);
+    }
+  };
+
+  // Setup dynamic list of parameters to generate
+  const charts = [
+    { id: 'v', title: 'Voltage Profile', data: plotData.v, color: '#3b82f6', ref: vRef },
+    { id: 'p', title: 'Active Power', data: plotData.p, color: '#f97316', ref: pRef },
+    { id: 'q', title: 'Reactive Power', data: plotData.q, color: '#22c55e', ref: qRef },
+    ...(showPowerFactor ? [{ id: 'pf', title: 'Power Factor', data: plotData.pf, color: '#a855f7', ref: pfRef }] : [])
+  ];
+
+  const renderPlot = (c, isModal = false) => (
+    <div 
+      key={c.id} 
+      className={`bg-white rounded-lg border border-slate-200 p-3 flex flex-col ${
+        isModal ? 'h-[75vh] w-full' : 'h-[280px] w-full'
       }`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 w-full flex-shrink-0 border-b border-[var(--analytics-border-inner)] pb-3">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">{c.title}</span>
         <div className="flex items-center gap-2">
-          <span className={`${isHistoricalMode ? 'text-amber-500 animate-pulse' : 'text-green-500'} text-xs md:text-sm`}>
+          <button
+            type="button"
+            onClick={() => handleIndividualDownload(c.ref, c.title)}
+            className="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+            title="Download PNG Plot"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
+          {isModal ? (
+            <button
+              type="button"
+              onClick={() => setMaximizedChart(null)}
+              className="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setMaximizedChart(c.id)}
+              className="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex-grow w-full h-full min-h-0">
+        <Plot 
+          ref={c.ref} 
+          data={[{ 
+            x: plotData.labels, 
+            y: c.data, 
+            type: 'bar', 
+            marker: { color: c.color } 
+          }]} 
+          layout={{
+            autosize: true,
+            margin: { l: 35, r: 15, t: 15, b: 35 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            xaxis: { tickfont: { size: 9, family: 'monospace' } },
+            yaxis: { tickfont: { size: 9, family: 'monospace' } }
+          }} 
+          config={{ displayModeBar: false, responsive: true }} 
+          className="w-full h-full"
+        />
+      </div>
+    </div>
+  );
+
+  return (
+    <div 
+      data-theme={currentTheme} 
+      className={`bg-[var(--analytics-bg-outer)] rounded-xl p-4 border shadow-xl flex flex-col h-full w-full overflow-hidden transition-all duration-300 ${
+        isHistoricalMode 
+          ? 'border-amber-500/50 shadow-amber-950/20 ring-1 ring-amber-500/20' 
+          : 'border-[var(--analytics-border-outer)]'
+      }`}
+    >
+      {/* Header Panel */}
+      <div className="flex items-center justify-between mb-4 w-full flex-shrink-0 border-b border-[var(--analytics-border-inner)] pb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`${isHistoricalMode ? 'text-amber-500 animate-pulse' : 'text-green-500'} text-xs md:text-sm flex-shrink-0`}>
             {isHistoricalMode ? <History className="w-4 h-4" /> : "📊"}
           </span>
-          <h2 className="text-xs md:text-sm font-black tracking-[0.1em] text-[var(--analytics-text-header)] uppercase font-sans flex items-center gap-2">
+          <h2 className="text-xs md:text-sm font-black tracking-[0.1em] text-[var(--analytics-text-header)] uppercase font-sans flex items-center gap-2 truncate">
             ANALYTICS STREAM GALLERY
             {isHistoricalMode && (
-              <span className="text-[9px] font-mono tracking-wide px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase animate-pulse">
+              <span className="text-[9px] font-mono tracking-wide px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase animate-pulse hidden sm:inline-block">
                 ARCHIVE GRAPH VIEW
               </span>
             )}
           </h2>
         </div>
 
-        {/* Action Controls: Download ZIP Action & Structural Layout Buttons */}
+        {/* Global Zip Trigger Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase rounded-md border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 hover:text-white transition-all cursor-pointer select-none active:scale-95"
+          <button 
+            type="button" 
+            onClick={handleZipDownload}
+            disabled={!sessionData || !sessionData.active}
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase rounded-md border text-slate-300 transition-all select-none active:scale-95 ${
+              (!sessionData || !sessionData.active)
+                ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-900/20 text-slate-600'
+                : 'border-slate-700 bg-slate-800/40 hover:bg-slate-800 hover:text-white cursor-pointer'
+            }`}
           >
-            <Download className="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <FileArchive className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">DOWNLOAD ZIP</span>
-          </button>
-          
-          {/* Inactive Structural Resize Action triggers */}
-          <button
-            type="button"
-            disabled
-            className="p-1.5 rounded-md border border-slate-800 bg-slate-900/20 text-slate-600 transition-all select-none opacity-40 cursor-not-allowed flex items-center justify-center w-7 h-7 md:w-8 md:h-8"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4">
-              <path d="M 4 8 L 4 4 L 8 4 M 16 4 L 20 4 L 20 8 M 20 16 L 20 20 L 16 20 M 8 20 L 4 20 L 4 16" />
-            </svg>
           </button>
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="flex-grow bg-[var(--analytics-bg-inner)] rounded-lg border border-[var(--analytics-border-inner)] flex items-center justify-center">
-        <p className="text-[10px] text-[var(--analytics-text-muted)] font-mono uppercase tracking-widest">
-          Data Stream Gallery
-        </p>
+      {/* Main Graph Layout Area */}
+      <div className="flex-grow h-0 min-h-0 bg-[var(--analytics-bg-inner)] p-3 rounded-lg border border-[var(--analytics-border-inner)] overflow-y-auto space-y-4 custom-gallery-scrollbar">
+        {(!sessionData || !sessionData.active || plotData.labels.length === 0) ? (
+          <div className="h-full w-full flex items-center justify-center">
+            <p className="text-[10px] text-[var(--analytics-text-muted)] font-mono uppercase tracking-widest">
+              No Data Stream Instantiated
+            </p>
+          </div>
+        ) : (
+          charts.map(c => renderPlot(c))
+        )}
       </div>
+
+      {/* Chart Focus Overlay Modal */}
+      {maximizedChart && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-6 md:p-12 animate-fadeIn">
+          <div className="w-full max-w-5xl bg-[var(--analytics-bg-outer)] p-2 rounded-xl border border-slate-700/30 shadow-2xl">
+            {renderPlot(charts.find(c => c.id === maximizedChart), true)}
+          </div>
+        </div>
+      )}
+
+      {/* Component Injected Global Scrollbar Tweaks */}
+      <style>{`
+        .custom-gallery-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-gallery-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-gallery-scrollbar::-webkit-scrollbar-thumb {
+          background: #475569;
+          border-radius: 4px;
+        }
+        .custom-gallery-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #64748b;
+        }
+      `}</style>
     </div>
   );
 }

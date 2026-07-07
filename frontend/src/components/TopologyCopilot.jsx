@@ -136,9 +136,16 @@ export default function TopologyCopilot({
             <button
               type="button"
               onClick={() => onBranchFromHistory && onBranchFromHistory(historicalMessage)}
-              className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 font-mono px-2.5 py-1 rounded-full border border-amber-500/40 hover:bg-amber-500 hover:text-black transition-all cursor-pointer select-none active:scale-95 whitespace-nowrap"
+              className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded-full border transition-all cursor-pointer select-none active:scale-95 whitespace-nowrap"
+              style={{
+                backgroundColor: 'var(--copilot-branch-hist-btn-bg)',
+                borderColor: 'var(--copilot-branch-hist-btn-border)',
+                color: 'var(--copilot-branch-hist-btn-text)'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--copilot-branch-hist-btn-bg-hover)'; e.currentTarget.style.color = 'var(--copilot-branch-hist-btn-text-hover)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--copilot-branch-hist-btn-bg)'; e.currentTarget.style.color = 'var(--copilot-branch-hist-btn-text)'; }}
             >
-              <GitFork className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" />
+              <GitFork className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" style={{ color: 'var(--copilot-branch-hist-icon-clr)' }} />
               <span>Branch State</span>
             </button>
           ) : (
@@ -146,14 +153,21 @@ export default function TopologyCopilot({
               type="button"
               disabled={status === "Not Started"}
               onClick={onBranchClick}
-              className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider bg-[var(--copilot-bg-branch)] text-[var(--copilot-text-branch)] font-mono px-2.5 py-1 rounded-full border border-blue-800/50 whitespace-nowrap transition-all select-none ${
+              className={`flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded-full border whitespace-nowrap transition-all select-none ${
                 status === "Not Started"
                   ? "opacity-40 cursor-not-allowed border-slate-800"
-                  : "cursor-pointer hover:bg-blue-950/40 active:scale-95"
+                  : "cursor-pointer active:scale-95"
               }`}
+              style={status !== "Not Started" ? {
+                backgroundColor: 'var(--copilot-branch-live-btn-bg)',
+                borderColor: 'var(--copilot-branch-live-btn-border)',
+                color: 'var(--copilot-branch-live-btn-text)'
+              } : {}}
+              onMouseEnter={e => status !== "Not Started" && (e.currentTarget.style.backgroundColor = 'var(--copilot-branch-live-btn-bg-hover)')}
+              onMouseLeave={e => status !== "Not Started" && (e.currentTarget.style.backgroundColor = 'var(--copilot-branch-live-btn-bg)')}
               title={status === "Not Started" ? "Initialize a valid session stream to unlock parallel branching options" : "Fork parallel history trace"}
             >
-              <GitFork className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" />
+              <GitFork className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" style={{ color: 'var(--copilot-branch-live-icon-clr)' }} />
               <span className="inline">Branch Chat</span>
             </button>
           )}
@@ -178,7 +192,7 @@ export default function TopologyCopilot({
                 <div className="text-right w-full flex justify-end">
                   <div className="bg-[var(--copilot-bg-user-bubble)] px-4 py-3 rounded-xl rounded-tr-none border border-[var(--copilot-border-user-bubble)] font-mono shadow-md text-left max-w-[60%]">
                     <span className="text-[10px] md:text-xs text-[var(--copilot-text-user-timestamp)] font-mono tracking-wider font-bold uppercase block mb-2 text-left opacity-90">
-                      USER • {msgTime}
+                      USER • {msgTime} [ID: {m.state_seq_id ?? 0}]
                     </span>
                     <div className="text-[var(--copilot-text-main)] font-mono leading-relaxed break-words [overflow-wrap:anywhere]">
                       {msgContent}
@@ -202,7 +216,7 @@ export default function TopologyCopilot({
                     title={isSelectableSnapshot ? "Click message profile frame to view historical topology grid alignment" : undefined}
                   >
                     <span className="text-[10px] md:text-xs text-[var(--copilot-text-system-timestamp)] font-mono font-bold tracking-wider uppercase block mb-1.5 flex items-center gap-1.5">
-                      SYSTEM • {msgTime}
+                      SYSTEM • {msgTime} [ID: {m.state_seq_id ?? 0}]
                       {isCurrentlyTargetedFrame && (
                         <span className="text-[9px] font-semibold text-amber-400 font-sans tracking-wide lowercase bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-500/30 animate-pulse">
                           active track
@@ -288,10 +302,16 @@ export default function TopologyCopilot({
           className={`p-2.5 rounded-lg border transition-all flex items-center justify-center ${
             isHistoricalMode || !inputValue.trim()
               ? 'bg-slate-800/20 border-slate-800 text-slate-600 cursor-not-allowed opacity-50'
-              : 'bg-[var(--copilot-bg-action)] border-[var(--copilot-border-action)] text-[var(--copilot-text-status-active)] hover:border-[var(--copilot-border-subtle)] active:scale-95 cursor-pointer'
+              : 'cursor-pointer active:scale-95'
           }`}
+          style={(!isHistoricalMode && inputValue.trim()) ? {
+            backgroundColor: 'var(--copilot-send-btn-bg)',
+            borderColor: 'var(--copilot-send-btn-border)',
+          } : {}}
+          onMouseEnter={e => (!isHistoricalMode && inputValue.trim()) && (e.currentTarget.style.borderColor = 'var(--copilot-send-btn-border-hover)')}
+          onMouseLeave={e => (!isHistoricalMode && inputValue.trim()) && (e.currentTarget.style.borderColor = 'var(--copilot-send-btn-border)')}
         >
-          <Send className="w-4 h-4 md:w-4.5 md:h-4.5" />
+          <Send className="w-4 h-4 md:w-4.5 md:h-4.5" style={{ color: 'var(--copilot-send-icon-clr)' }} />
         </button>
       </div>
     </div>
