@@ -37,7 +37,7 @@ const ChatPanel = ({ isOpen, onClose, sessions = [], currentSessionName, onDelet
       return; 
     } 
     try { 
-      const response = await fetch("http://127.0.0.1:8000/api/session/create", { 
+      const response = await fetch("http://127.0.0.1:9700/api/session/create", { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ session_name: trimmedName }) 
@@ -67,7 +67,7 @@ const ChatPanel = ({ isOpen, onClose, sessions = [], currentSessionName, onDelet
   const submitDeleteSession = async () => { 
     if (!sessionTargetForDeletion) return; 
     try { 
-      const response = await fetch(`http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionTargetForDeletion)}`, { 
+      const response = await fetch(`http://127.0.0.1:9700/api/session/${encodeURIComponent(sessionTargetForDeletion)}`, { 
         method: 'DELETE' 
       }); 
       if (response.ok) { 

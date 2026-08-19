@@ -38,9 +38,7 @@ function App() {
   const containerRef = useRef(null);
   const dragInfoRef = useRef({ isDragging: false, handleIndex: -1, startX: 0, startWidths: [] });
 
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    return localStorage.getItem('ieee-dashboard-theme') || 'dark';
-  });
+  const [currentTheme, setCurrentTheme] = useState('dark');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [sessionList, setSessionList] = useState([]);
 
@@ -82,8 +80,8 @@ function App() {
     const syncPipelineDataStream = async () => {
       try {
         const url = historicalMessage?.state_seq_id 
-          ? `http://127.0.0.1:8000/api/topology/historical?session_name=${encodeURIComponent(sessionName)}&state_seq_id=${historicalMessage.state_seq_id}`
-          : `http://127.0.0.1:8000/api/topology?session_name=${encodeURIComponent(sessionName)}`;
+          ? `http://127.0.0.1:9700/api/topology/historical?session_name=${encodeURIComponent(sessionName)}&state_seq_id=${historicalMessage.state_seq_id}`
+          : `http://127.0.0.1:9700/api/topology?session_name=${encodeURIComponent(sessionName)}`;
 
         const res = await fetch(url, { headers: { "Cache-Control": "no-cache" } });
         const gridGraphPayload = await res.json();
@@ -127,7 +125,7 @@ function App() {
         const loadSlotData = async (sessionName, setInitialData, setStage) => {
           if (!sessionName) return;
           try {
-            const res = await fetch(`http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionName)}`, {
+            const res = await fetch(`http://127.0.0.1:9700/api/session/${encodeURIComponent(sessionName)}`, {
               method: "GET",
               headers: { "Cache-Control": "no-cache" }
             });
@@ -160,7 +158,7 @@ function App() {
       const pathSlug = pathName.replace(/^\//, '').trim();
       try {
         if (pathSlug) {
-          const response = await fetch(`http://127.0.0.1:8000/api/session/${pathSlug}`, {
+          const response = await fetch(`http://127.0.0.1:9700/api/session/${pathSlug}`, {
             method: "GET",
             headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
           });
@@ -178,7 +176,7 @@ function App() {
             setInitialDataA(data);
           }
         } else {
-          const response = await fetch("http://127.0.0.1:8000/api/init", {
+          const response = await fetch("http://127.0.0.1:9700/api/init", {
             method: "GET",
             headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
           });
@@ -216,7 +214,7 @@ function App() {
 
   const fetchAllSessions = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/list-sessions");
+      const response = await fetch("http://127.0.0.1:9700/api/list-sessions");
       const data = await response.json();
       setSessionList(data);
     } catch (err) {
@@ -262,7 +260,7 @@ function App() {
       if (window.__pendingBranchTimestamp) {
         payload.timestamp = window.__pendingBranchTimestamp;
       }
-      const res = await fetch(`http://127.0.0.1:8000/api/session/${encodeURIComponent(sessionName)}/branch`, {
+      const res = await fetch(`http://127.0.0.1:9700/api/session/${encodeURIComponent(sessionName)}/branch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

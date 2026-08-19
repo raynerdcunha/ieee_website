@@ -16,7 +16,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5175"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,6 +36,32 @@ def get_file_path(session_name: str) -> str:
         os.makedirs(HISTORY_DIR, exist_ok=True)
     return os.path.join(HISTORY_DIR, f"{session_name}.jsonl")
 
+
+# Real IEEE 33-bus (Baran & Wu) per-bus loads, kW/kVAr — from gt_reconfig/config.py.
+# Bus 30's Q is 600 in that source (an outlier vs. the textbook 100) — kept as-is,
+# this mirrors what the current Agent-main actually uses, not a "corrected" value.
+IEEE33_P_KW = [0, 100, 90, 120, 60, 60, 200, 200, 60, 60, 45, 60, 60, 120,
+               60, 60, 60, 90, 90, 90, 90, 90, 90, 420, 420, 60, 60, 60,
+               120, 200, 150, 210, 0]
+IEEE33_Q_KVAR = [0, 60, 40, 80, 30, 20, 100, 100, 20, 20, 30, 35, 35, 80,
+                 10, 20, 20, 40, 40, 40, 40, 40, 50, 200, 200, 25, 25, 20,
+                 70, 600, 70, 100, 0]
+
+# Real R/X (ohms) for the 32 backbone branches (lines 1-32), same source.
+# Tie switches (lines 33-37) are deliberately left out — 5175 and Agent-main
+# place two of the five ties on different bus pairs, so there's no correct
+# value to copy for those two; see conversation for the mismatch details.
+IEEE33_BACKBONE_R = [0.0922, 0.4930, 0.3660, 0.3811, 0.8190, 0.1872, 1.7114,
+                      1.0300, 1.0400, 0.1966, 0.3744, 1.4680, 0.5416, 0.5910,
+                      0.7463, 1.2890, 0.7320, 0.1640, 1.5042, 0.4095, 0.7089,
+                      0.4512, 0.8980, 0.8960, 0.2030, 0.2842, 1.0590, 0.8042,
+                      0.5075, 0.9744, 0.3105, 0.3410]
+IEEE33_BACKBONE_X = [0.0477, 0.2511, 0.1864, 0.1941, 0.7070, 0.6188, 1.2351,
+                      0.7400, 0.7400, 0.0650, 0.1238, 1.1550, 0.7129, 0.5260,
+                      0.5450, 1.7210, 0.5740, 0.1565, 1.3554, 0.4784, 0.9373,
+                      0.3083, 0.7091, 0.7011, 0.1034, 0.1447, 0.9337, 0.7006,
+                      0.2585, 0.9630, 0.3619, 0.5302]
+
 def get_engineering_defaults(bus_system: str = "33"):
     """Generates standard factory baseline vectors based on the designated grid size."""
     try:
@@ -43,12 +69,24 @@ def get_engineering_defaults(bus_system: str = "33"):
     except:
         bus_count = 33
     line_count = 37 if bus_count == 33 else bus_count + 4
+
+    if bus_count == 33:
+        p = list(IEEE33_P_KW)
+        q = list(IEEE33_Q_KVAR)
+        r = list(IEEE33_BACKBONE_R) + [0.01] * (line_count - len(IEEE33_BACKBONE_R))
+        x = list(IEEE33_BACKBONE_X) + [0.02] * (line_count - len(IEEE33_BACKBONE_X))
+    else:
+        p = [0.1] * bus_count
+        q = [0.05] * bus_count
+        r = [0.01] * line_count
+        x = [0.02] * line_count
+
     return {
         "v": [1.0] * bus_count,
-        "p": [0.1] * bus_count,
-        "q": [0.05] * bus_count,
-        "r": [0.01] * line_count,
-        "x": [0.02] * line_count,
+        "p": p,
+        "q": q,
+        "r": r,
+        "x": x,
         "unused_lines": []
     }
 
@@ -63,7 +101,7 @@ def get_full_history(session_name: str):
             for line in f:
                 if line.strip():
                     entry = json.loads(line.strip())
-                    if entry.get("sender") == "state_snapshot":
+                    if entry.get("sender") in ("state_snapshot", "plotly_figure"):
                         continue
                     history.append({
                         "sender": entry["sender"],

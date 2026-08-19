@@ -12,6 +12,16 @@ export default function AnalyticsStreamGallery({
 }) {
   const [maximizedChart, setMaximizedChart] = useState(null);
   const [showPowerFactor, setShowPowerFactor] = useState(false);
+  // Decorative tab row — matches 5174's "Function decoupled" disabled-tab style.
+  // All permanently disabled: no active/selected state, ever, for any of them.
+  const galleryTabs = [
+    { id: 'branch-load', label: 'Branch Load' },
+    { id: 'indices', label: 'Indices' },
+    { id: 'elec-distance', label: 'Elec. Distance' },
+    { id: 'sensitivity', label: 'Sensitivity' },
+    { id: 'feeder-zones', label: 'Feeder Zones' },
+    { id: 'risk-score', label: 'Risk Score' },
+  ];
 
   // Individual chart references bound for DOM-canvas extraction
   const vRef = useRef(null);
@@ -91,7 +101,7 @@ export default function AnalyticsStreamGallery({
         })
       );
 
-      const res = await fetch("http://127.0.0.1:8000/api/analytics/zip-export", {
+      const res = await fetch("http://127.0.0.1:9700/api/analytics/zip-export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ images })
@@ -224,9 +234,27 @@ export default function AnalyticsStreamGallery({
         </div>
       </div>
 
+      {/* Decorative Tab Row — matches 5174's own "Function decoupled" disabled-tab style */}
+      <div className="w-full flex items-center gap-1.5 py-1.5 mb-2 border-b border-slate-200 dark:border-slate-800/60 overflow-x-auto flex-shrink-0 hide-scrollbar">
+        {galleryTabs.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            disabled
+            title="Function decoupled"
+            className="px-3 py-1 text-[10px] whitespace-nowrap font-mono font-black rounded-lg uppercase tracking-wide border transition-all select-none opacity-30 cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-slate-350 dark:border-slate-800 text-slate-500"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Main Graph Layout Area */}
       <div className="flex-grow h-0 min-h-0 bg-[var(--analytics-bg-inner)] p-3 rounded-lg border border-[var(--analytics-border-inner)] overflow-y-auto space-y-4 custom-gallery-scrollbar">
-        {(!sessionData || !sessionData.active || plotData.labels.length === 0) ? (
+        {/* Graph rendering disabled on purpose: /api/topology returns a Plotly figure
+            object with no top-level v/p/q, so sessionData.active never populates and
+            these charts never had real data anyway. Always show the empty state. */}
+        {true ? (
           <div className="h-full w-full flex items-center justify-center">
             <p className="text-[10px] text-[var(--analytics-text-muted)] font-mono uppercase tracking-widest">
               No Data Stream Instantiated
@@ -237,8 +265,8 @@ export default function AnalyticsStreamGallery({
         )}
       </div>
 
-      {/* Chart Focus Overlay Modal */}
-      {maximizedChart && (
+      {/* Chart Focus Overlay Modal — disabled along with graph rendering above */}
+      {false && maximizedChart && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-6 md:p-12 animate-fadeIn">
           <div className="w-full max-w-5xl bg-[var(--analytics-bg-outer)] p-2 rounded-xl border border-slate-700/30 shadow-2xl">
             {renderPlot(charts.find(c => c.id === maximizedChart), true)}

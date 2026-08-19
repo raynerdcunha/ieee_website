@@ -112,9 +112,9 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
             )
             
             if current_line_num in unused_lines:
-                color = 'lightgrey'
+                color = '#475569'
             else:
-                color = 'red' if l_type == 't' else 'black'
+                color = '#f87171' if l_type == 't' else '#60a5fa'
                 
             if current_line_num:
                 assigned_line_colors[current_line_num] = color
@@ -143,10 +143,10 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
                 mid_y = y0 + 0.3
                 mid_x = (x0 + x1) / 2
                 
-            actual_line_color = assigned_line_colors.get(label, 'black')
-            text_color = 'blue' if actual_line_color == 'black' else actual_line_color
-            
-            hover_color = {"red": "white", "blue": "white", "lightgrey": "black", "black": "white"}
+            actual_line_color = assigned_line_colors.get(label, '#60a5fa')
+            text_color = '#93c5fd' if actual_line_color == '#60a5fa' else ('#fca5a5' if actual_line_color == '#f87171' else '#475569')
+
+            hover_color = {"#93c5fd": "#0f172a", "#fca5a5": "#0f172a", "#475569": "#e2e8f0"}
             
             idx = int(label) - 1
             r_val = r[idx] if idx < len(r) else 0.0
@@ -177,7 +177,7 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
     fig.add_trace(go.Scatter(
         x=bus_x, y=bus_y,
         mode='markers',
-        marker=dict(symbol='line-ew', size=30 * ratio, line=dict(width=4 * ratio, color='black')),
+        marker=dict(symbol='line-ew', size=30 * ratio, line=dict(width=4 * ratio, color='#7dd3fc')),
         hoverinfo='none',
         showlegend=False
     ))
@@ -197,8 +197,8 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
         mode='markers+text',
         text=bus_text,
         textposition="middle center",
-        textfont=dict(size=16 * ratio, color='black', family="Courier New", weight="bold"),
-        marker=dict(symbol='circle', size=25 * ratio, color='white', line=dict(width=1.5 * ratio, color='black')),
+        textfont=dict(size=16 * ratio, color='#e2e8f0', family="Courier New", weight="bold"),
+        marker=dict(symbol='circle', size=25 * ratio, color='rgba(15,23,42,0.85)', line=dict(width=1.5 * ratio, color='#60a5fa')),
         hoverinfo='text',
         hovertext=hover_texts,
         hoverlabel=dict(font=dict(family="Courier New", weight="bold")),
@@ -211,14 +211,14 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
         mode='text',
         text="Substation",
         textposition="top center",
-        textfont=dict(size=18 * ratio, color='black', family="Merriweather Sans"),
+        textfont=dict(size=18 * ratio, color='#e2e8f0', family="Merriweather Sans"),
         hoverinfo='none',
         showlegend=False
     ))
 
     # 6. Static Substation Geometry Shape Layout
     layout_shapes = [
-        dict(type="rect", x0=-0.1, x1=0.1, y0=9.8, y1=10.2, line=dict(color="black", width=4 * ratio), fillcolor="white", xref="x", yref="y")
+        dict(type="rect", x0=-0.1, x1=0.1, y0=9.8, y1=10.2, line=dict(color="#60a5fa", width=4 * ratio), fillcolor="rgba(30,58,138,0.3)", xref="x", yref="y")
     ]
 
     # --- VECTOR SVG PATH ENGINE ---
@@ -248,19 +248,19 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
             f"Z"
         )
         layout_shapes.append(dict(
-            type="path", path=arrow_path, line=dict(width=0), fillcolor="black", xref="x", yref="y"
+            type="path", path=arrow_path, line=dict(width=0), fillcolor="#7dd3fc", xref="x", yref="y"
         ))
         
     fig.update_layout(shapes=layout_shapes)
 
     # --- DUMMY INTERACTIVE LEGEND LAYER ---
     legend_categories = [
-        {"name": "Main Spine (Closed)", "color": "black", "dash": "solid"},
-        {"name": "Tie-Lines (Closed)", "color": "red", "dash": "dash"},
-        {"name": "Open / Isolated Lines", "color": "lightgrey", "dash": "solid"},
-        {"name": "Bus Interconnections", "color": "black", "symbol": "line-ew"},
-        {"name": "Substation Supply Bus", "color": "black", "symbol": "square"},
-        {"name": "Bus Number", "color": "#1e40af", "symbol": "circle"}
+        {"name": "Main Spine (Closed)", "color": "#60a5fa", "dash": "solid"},
+        {"name": "Tie-Lines (Closed)", "color": "#f87171", "dash": "dash"},
+        {"name": "Open / Isolated Lines", "color": "#475569", "dash": "solid"},
+        {"name": "Bus Interconnections", "color": "#7dd3fc", "symbol": "line-ew"},
+        {"name": "Substation Supply Bus", "color": "#60a5fa", "symbol": "square"},
+        {"name": "Bus Number", "color": "#60a5fa", "symbol": "circle"}
     ]
 
     for item in legend_categories:
@@ -273,8 +273,8 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
             )
             # Apply layout variables for the custom hollow network bus node
             if item["name"] == "Bus Number":
-                marker_opts["color"] = "white"
-                marker_opts["line"] = dict(width=2, color="#1e40af")
+                marker_opts["color"] = "rgba(15,23,42,0.85)"
+                marker_opts["line"] = dict(width=2, color="#60a5fa")
                 marker_opts["size"] = 11
 
             fig.add_trace(go.Scatter(
@@ -303,7 +303,7 @@ def topology(ratio=0.75, unused_lines=None, v=None, p_load=None, q_load=None, r=
             x=0.5,
             itemclick=False,
             itemdoubleclick=False,
-            font=dict(family="Courier New", size=11, color="black")
+            font=dict(family="Courier New", size=11, color="#cbd5e1")
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',

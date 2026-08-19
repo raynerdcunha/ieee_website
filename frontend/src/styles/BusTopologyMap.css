@@ -123,3 +123,12 @@
 .modebar-btn.active path {
   fill: #3b82f6 !important;
 }
+/* Hide spin buttons on number input */
+.hide-spin-button::-webkit-inner-spin-button,
+.hide-spin-button::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hide-spin-button {
+  -moz-appearance: textfield;
+}

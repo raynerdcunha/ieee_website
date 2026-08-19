@@ -1,7 +1,7 @@
 /* src/components/BusTopologyMap.jsx */
 import React, { useState, useEffect, useRef } from 'react';
 import Plot from 'react-plotly.js';
-import { Download, History } from 'lucide-react';
+import { Download, History, Search } from 'lucide-react';
 import '../styles/BusTopologyMap.css';
 
 export default function BusTopologyMap({
@@ -17,6 +17,7 @@ export default function BusTopologyMap({
   const [plotData, setPlotData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [busSearchQuery, setBusSearchQuery] = useState("");
   const containerRef = useRef(null);
   const plotRef = useRef(null); // ⚡ Holds reference to the raw underlying Plotly DOM element
   const plotlyInstanceRef = useRef(null);
@@ -46,8 +47,8 @@ export default function BusTopologyMap({
     const fetchTopologyGraph = async () => {
       // ✅ Evaluates execution router context safely with fallback values
       const endpoint = isHistoricalMode
-        ? `http://127.0.0.1:8000/api/topology/historical?session_name=${encodeURIComponent(targetSession)}&state_seq_id=${encodeURIComponent(historicalMessage.state_seq_id)}`
-        : `http://127.0.0.1:8000/api/topology?session_name=${encodeURIComponent(targetSession)}`;
+        ? `http://127.0.0.1:9700/api/topology/historical?session_name=${encodeURIComponent(targetSession)}&state_seq_id=${encodeURIComponent(historicalMessage.state_seq_id)}`
+        : `http://127.0.0.1:9700/api/topology?session_name=${encodeURIComponent(targetSession)}`;
 
       try {
         const response = await fetch(endpoint, {
@@ -155,6 +156,37 @@ export default function BusTopologyMap({
     }
   };
 
+  // Searches for a bus by number and zooms to it. If the bus doesn't exist
+  // in the current topology, this intentionally does nothing — no alert,
+  // no error, no clearing the input — so the query just sits there until
+  // the user corrects it to a bus number that actually exists.
+  const handleSearchBus = () => {
+    if (!plotData || !plotData.data || !busSearchQuery) return;
+    const searchTarget = String(busSearchQuery).trim();
+
+    let busTrace = plotData.data.find(t => t.name === '__bus_labels__');
+    if (!busTrace) {
+      busTrace = plotData.data.find(t =>
+        t.mode && t.mode.includes('text') &&
+        Array.isArray(t.text) && t.text.length > 1 &&
+        t.text.some(txt => /^\d+$/.test(String(txt)))
+      );
+    }
+    if (!busTrace) return;
+
+    const idx = busTrace.text.findIndex(txt => String(txt) === searchTarget);
+    if (idx !== -1) {
+      const px = busTrace.x[idx];
+      const py = busTrace.y[idx];
+      setAxisRanges({
+        xaxis: { autorange: false, range: [px - 2, px + 2] },
+        yaxis: { autorange: false, range: [py - 3, py + 3] }
+      });
+      setRevision(prev => prev + 1);
+    }
+    // else: bus not found — leave busSearchQuery as-is, do nothing further
+  };
+
   return (
     <div
       ref={containerRef}
@@ -181,6 +213,23 @@ export default function BusTopologyMap({
 
         {/* Action Panel Buttons */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md overflow-hidden mr-2">
+            <input
+              type="number"
+              value={busSearchQuery}
+              onChange={(e) => setBusSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchBus()}
+              placeholder="Bus #"
+              className="w-16 px-2 py-1 text-[10px] md:text-xs font-mono bg-transparent outline-none text-slate-700 dark:text-slate-200 hide-spin-button"
+            />
+            <button
+              type="button"
+              onClick={handleSearchBus}
+              className="p-1 text-slate-500 hover:text-blue-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleDownloadPNG}
